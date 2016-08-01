@@ -20,7 +20,7 @@ class Brew < Airtable::Table
   self.base_key = "app1"
   self.table_name = "Hot Brews"
 
-  belongs_to :tea, class: 'Tea'
+  belongs_to :tea, class: 'Tea', column: 'Tea'
 end
 
 class Tea < Airtable::Table
@@ -28,7 +28,7 @@ class Tea < Airtable::Table
   self.base_key = "app1"
   self.table_name = "Teas"
 
-  has_many :hot_brews, class: 'Brew'
+  has_many :hot_brews, class: 'Brew', column: "Hot Brews"
 
   def location
     [self[:village], self[:country], self[:region]].compact.join(", ")
@@ -36,9 +36,11 @@ class Tea < Airtable::Table
 end
 
 tea = Tea.all[2]
+
 tea.each do |tea|
   puts tea.location
 end
 
 brew = tea[:hot_brews].first
+brew[:tea].id == tea.id
 ```
