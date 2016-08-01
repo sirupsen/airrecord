@@ -36,11 +36,23 @@ class Tea < Airtable::Table
 end
 
 tea = Tea.all[2]
-
-tea.each do |tea|
-  puts tea.location
-end
-
 brew = tea[:hot_brews].first
 brew[:tea].id == tea.id
+
+tea = Tea.new(Name: "omg tea", Type: ["Oolong"])
+tea.create
+
+tea[:name] = "super omg tea"
+tea.save
+
+tea = Tea.find(tea.id)
+puts tea[:name]
+# => "super omg tea"
+
+brew = Brew.new(Tea: [tea], Rating: "3 - Fine")
+brew.create
+
+tea = Tea.find(tea.id)
+puts tea[:hot_brews].first[:rating]
+# => "3 - Fine"
 ```

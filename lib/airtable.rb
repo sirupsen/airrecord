@@ -131,7 +131,7 @@ module Airtable
       raise Airtable::Error, "Record already exists" unless new_record?
 
       body = { fields: serializable_fields }.to_json
-      response = client.connection.post("/v0/#{self.class.base_key}/#{client.escape(self.class.table_name)}", body)
+      response = client.connection.post("/v0/#{self.class.base_key}/#{client.escape(self.class.table_name)}", body, { 'Content-Type': 'application/json' })
       parsed_response = client.parse(response.body)
 
       if response.success?
@@ -155,7 +155,7 @@ module Airtable
         }]
       }.to_json
 
-      response = client.connection.patch("/v0/#{self.class.base_key}/#{client.escape(self.class.table_name)}/#{self.id}", body)
+      response = client.connection.patch("/v0/#{self.class.base_key}/#{client.escape(self.class.table_name)}/#{self.id}", body, { 'Content-Type': 'application/json' })
       parsed_response = client.parse(response.body)
 
       if response.success?
