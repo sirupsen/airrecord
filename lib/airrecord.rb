@@ -148,8 +148,8 @@ module Airrecord
         @updated_keys << column_mappings[key]
         fields[column_mappings[key]] = value
       else
-        # is possible if key isn't in this one
-        # add test for this later
+        @updated_keys << key
+        fields[key] = value
       end
     end
 
