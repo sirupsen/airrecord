@@ -5,7 +5,7 @@ require 'airrecord/version'
 
 Gem::Specification.new do |spec|
   spec.name          = "airrecord"
-  spec.version       = Airtable::VERSION
+  spec.version       = Airrecord::VERSION
   spec.authors       = ["Simon Eskildsen"]
   spec.email         = ["sirup@sirupsen.com"]
 
