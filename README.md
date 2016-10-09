@@ -1,11 +1,11 @@
-# Airtable
+# Airrecord
 
 ```ruby
 gem 'airrecord', github: "Sirupsen/airrecord"
 ```
 
 ```ruby
-teas = Airtable.table("key1", "app1", "Teas")
+teas = Airrecord.table("key1", "app1", "Teas")
 
 teas.records.each do |record|
   puts "#{record.id}: #{record[:name]}"
@@ -15,7 +15,7 @@ p teas.find(teas.records.first.id)
 ```
 
 ```ruby
-class Brew < Airtable::Table
+class Brew < Airrecord::Table
   self.api_key = "key1"
   self.base_key = "app1"
   self.table_name = "Hot Brews"
@@ -23,7 +23,7 @@ class Brew < Airtable::Table
   belongs_to :tea, class: 'Tea', column: 'Tea'
 end
 
-class Tea < Airtable::Table
+class Tea < Airrecord::Table
   self.api_key = "key1"
   self.base_key = "app1"
   self.table_name = "Teas"
