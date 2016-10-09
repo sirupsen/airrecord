@@ -1,7 +1,7 @@
 # Airtable
 
 ```ruby
-gem 'airtable', github: "Sirupsen/airtable"
+gem 'airrecord', github: "Sirupsen/airrecord"
 ```
 
 ```ruby

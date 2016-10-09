@@ -1,8 +1,8 @@
-require "airtable/version"
+require "airrecord/version"
 require "json"
 require "faraday"
 
-module Airtable
+module Airrecord
   Error = Class.new(StandardError)
 
   # TODO: This would be much simplified if we had a schema instead. Hopefully
@@ -42,6 +42,32 @@ module Airtable
         else
           client.handle_error(response.status, parsed_response)
         end
+      end
+
+      def schema
+        # handle associations as specific field type
+        # TODO: what if there's an overlap in alias and keys??
+        schema = {}
+
+        records(paginate: false).each do |record|
+          record.fields.keys.each do |key|
+            unless schema.find { |column| column[:key] == key }
+              schema[key] = {
+                key: key,
+                type: :field,
+                alias: underscore(key),
+              }
+            end
+          end
+        end
+
+        if @associations
+          @associations.each do |assoc|
+            schema[assoc[:field]][:type] = :association
+          end
+        end
+
+        schema
       end
 
       def records(filter: nil, sort: nil, view: nil, offset: nil, paginate: true, fields: nil)
@@ -128,7 +154,7 @@ module Airtable
     end
 
     def create
-      raise Airtable::Error, "Record already exists" unless new_record?
+      raise Error, "Record already exists" unless new_record?
 
       body = { fields: serializable_fields }.to_json
       response = client.connection.post("/v0/#{self.class.base_key}/#{client.escape(self.class.table_name)}", body, { 'Content-Type': 'application/json' })
@@ -144,7 +170,7 @@ module Airtable
     end
 
     def save
-      raise Airtable::Error, "Unable to save a new record" if new_record?
+      raise Error, "Unable to save a new record" if new_record?
 
       return true if @updated_keys.empty?
 
@@ -166,7 +192,7 @@ module Airtable
     end
 
     def destroy
-      raise Airtable::Error, "Unable to destroy new record" if new_record?
+      raise Error, "Unable to destroy new record" if new_record?
 
       response = client.connection.delete("/v0/#{self.class.base_key}/#{client.escape(self.class.table_name)}/#{self.id}")
       parsed_response = client.parse(response.body)
@@ -204,8 +230,12 @@ module Airtable
       @fields = fields
     end
 
-    def underscore(key)
+    def self.underscore(key)
       key.to_s.strip.gsub(/\W+/, "_").downcase.to_sym
+    end
+
+    def underscore(key)
+      self.class.underscore(key)
     end
 
     def created_at=(created_at)
@@ -219,7 +249,7 @@ module Airtable
   end
 
   def self.table(api_key, base_key, table_name)
-    Class.new(Airtable::Table) do |klass|
+    Class.new(Table) do |klass|
       klass.table_name = table_name
       klass.api_key = api_key
       klass.base_key = base_key
@@ -255,9 +285,9 @@ module Airtable
 
     def handle_error(status, error)
       if error.is_a?(Hash)
-        raise Airtable::Error, "HTTP #{status}: #{error['error']["type"]}: #{error['error']['message']}"
+        raise Error, "HTTP #{status}: #{error['error']["type"]}: #{error['error']['message']}"
       else
-        raise Airtable::Error, "HTTP #{status}: Communication error: #{error}"
+        raise Error, "HTTP #{status}: Communication error: #{error}"
       end
     end
   end

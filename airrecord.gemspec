@@ -1,10 +1,10 @@
 # coding: utf-8
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'airtable/version'
+require 'airrecord/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = "airtable"
+  spec.name          = "airrecord"
   spec.version       = Airtable::VERSION
   spec.authors       = ["Simon Eskildsen"]
   spec.email         = ["sirup@sirupsen.com"]

@@ -1,9 +1,9 @@
 require 'securerandom'
 require 'test_helper'
 
-class AirtableTest < Minitest::Test
+class AirrecordTest < Minitest::Test
   def setup
-    @table = Airtable.table("key1", "app1", "table1")
+    @table = Airrecord.table("key1", "app1", "table1")
 
     @stubs = Faraday::Adapter::Test::Stubs.new
     @table.client.connection = Faraday.new { |builder|
@@ -79,11 +79,11 @@ class AirtableTest < Minitest::Test
   end
 
   def test_error_response
-    table = Airtable.table("key1", "app1", "unknown")
+    table = Airrecord.table("key1", "app1", "unknown")
 
     stub_error_request(type: "TABLE_NOT_FOUND", message: "Could not find table", table: table)
 
-    assert_raises Airtable::Error do
+    assert_raises Airrecord::Error do
       table.records
     end
   end
@@ -136,7 +136,7 @@ class AirtableTest < Minitest::Test
     record[:name] = "new_name"
     stub_patch_request(record, ["Name"], return_body: { error: { type: "oh noes", message: 'yes' } }, status: 401)
 
-    assert_raises Airtable::Error do
+    assert_raises Airrecord::Error do
       record.save
     end
   end
@@ -147,7 +147,7 @@ class AirtableTest < Minitest::Test
     record[:name] = "new_name"
     stub_patch_request(record, ["Name"], return_body: { error: { type: "oh noes", message: 'yes' } }, status: 401)
 
-    assert_raises Airtable::Error do
+    assert_raises Airrecord::Error do
       record.save
     end
 
@@ -158,7 +158,7 @@ class AirtableTest < Minitest::Test
   def test_update_raises_if_new_record
     record = @table.new(Name: "omg")
 
-    assert_raises Airtable::Error do
+    assert_raises Airrecord::Error do
       record.save
     end
   end
@@ -190,7 +190,7 @@ class AirtableTest < Minitest::Test
 
     assert record.create
 
-    assert_raises Airtable::Error do
+    assert_raises Airrecord::Error do
       record.create
     end
   end
@@ -200,7 +200,7 @@ class AirtableTest < Minitest::Test
 
     stub_post_request(record, status: 401, return_body: { error: { type: "omg", message: "wow" }})
 
-    assert_raises Airtable::Error do
+    assert_raises Airrecord::Error do
       record.create
     end
   end
@@ -218,7 +218,7 @@ class AirtableTest < Minitest::Test
   def test_find_handles_error
     stub_find_request(nil, return_body: { error: { type: "not found", message: "not found" } }, id: "noep", status: 404)
 
-    assert_raises Airtable::Error do
+    assert_raises Airrecord::Error do
       @table.find("noep")
     end
   end
@@ -226,7 +226,7 @@ class AirtableTest < Minitest::Test
   def test_destroy_new_record_fails
     record = @table.new(Name: "walrus")
 
-    assert_raises Airtable::Error do
+    assert_raises Airrecord::Error do
       record.destroy
     end
   end
@@ -241,7 +241,7 @@ class AirtableTest < Minitest::Test
     record = first_record
     stub_delete_request(record.id, status: 404, response_body: { error: { type: "not found", message: "whatever" } }.to_json)
 
-    assert_raises Airtable::Error do
+    assert_raises Airrecord::Error do
       record.destroy
     end
   end
@@ -251,7 +251,7 @@ class AirtableTest < Minitest::Test
 
     stub_delete_request(record.id, status: 500)
 
-    assert_raises Airtable::Error do
+    assert_raises Airrecord::Error do
       record.destroy
     end
   end

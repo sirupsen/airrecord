@@ -1,6 +1,6 @@
 require 'test_helper'
 
-class Tea < Airtable::Table
+class Tea < Airrecord::Table
   self.api_key = "key1"
   self.base_key = "app1"
   self.table_name = "Teas"
@@ -8,7 +8,7 @@ class Tea < Airtable::Table
   has_many :brews, class: "Brew", column: "Brews"
 end
 
-class Brew < Airtable::Table
+class Brew < Airrecord::Table
   self.api_key = "key1"
   self.base_key = "app1"
   self.table_name = "Brews"
@@ -19,7 +19,7 @@ end
 class AssociationsTest < MiniTest::Test
   def setup
     @stubs = Faraday::Adapter::Test::Stubs.new
-    Airtable::Table.client.connection = Faraday.new { |builder|
+    Airrecord::Table.client.connection = Faraday.new { |builder|
       builder.adapter :test, @stubs
     }
   end
@@ -31,7 +31,7 @@ class AssociationsTest < MiniTest::Test
     stub_find_request(record, id: "rec2", table: Brew)
 
     assert_equal 1, tea[:brews].size
-    assert_kind_of Airtable::Table, tea[:brews].first
+    assert_kind_of Airrecord::Table, tea[:brews].first
     assert_equal "rec2", tea[:brews].first.id
   end
 
