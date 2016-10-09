@@ -6,7 +6,7 @@ approach to approaching Airtable more like a database from Ruby's point of view,
 inviting inspiration from ActiveRecord's API.
 
 ```ruby
-gem 'airrecord', github: "Sirupsen/airrecord"
+gem 'airrecord'
 ```
 
 ## Examples
