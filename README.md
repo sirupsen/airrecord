@@ -1,8 +1,17 @@
 # Airrecord
 
+Airrecord is an alternative to
+[`airtable-ruby`](https://github.com/airtable/airtable-ruby). Airrecord takes an
+approach to approaching Airtable more like a database from Ruby's point of view,
+inviting inspiration from ActiveRecord's API.
+
 ```ruby
 gem 'airrecord', github: "Sirupsen/airrecord"
 ```
+
+## Examples
+
+There's a simple API that allows more ad-hoc querying of Airtable:
 
 ```ruby
 teas = Airrecord.table("key1", "app1", "Teas")
@@ -13,6 +22,11 @@ end
 
 p teas.find(teas.records.first.id)
 ```
+
+Then there's the API which allows you to define tables as classes and
+relationships between them. This maps with ActiveRecord models. This makes
+working with relationships much easier, and allows you to define domain-specific
+logic on the models.
 
 ```ruby
 class Brew < Airrecord::Table
