@@ -95,7 +95,14 @@ module Airrecord
           }
 
           if paginate && parsed_response["offset"]
-            records.concat(records(**options.merge(offset: parsed_response["offset"])))
+            records.concat(records(
+              filter: filter,
+              sort: sort,
+              view: view,
+              paginate: paginate,
+              fields: fields,
+              offset: parsed_response["offset"],
+            ))
           end
 
           records
@@ -249,7 +256,7 @@ module Airrecord
 
     def type_cast(value)
       if value =~ /\d{4}-\d{2}-\d{2}/
-        Time.parse(value)
+        Time.parse(value + " UTC")
       else
         value
       end
