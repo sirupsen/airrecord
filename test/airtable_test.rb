@@ -255,4 +255,11 @@ class AirrecordTest < Minitest::Test
       record.destroy
     end
   end
+
+  def test_dates_are_type_casted
+    stub_request([{"Name": "omg", "Created": Time.now.to_s}])
+
+    record = first_record
+    assert_instance_of Time, record[:created]
+  end
 end

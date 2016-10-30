@@ -136,7 +136,7 @@ module Airrecord
         return associations.first if association[:single]
         associations
       else
-        value
+        type_cast(value)
       end
     end
 
@@ -245,6 +245,14 @@ module Airrecord
 
     def client
       self.class.client
+    end
+
+    def type_cast(value)
+      if value =~ /\d{4}-\d{2}-\d{2}/
+        Time.parse(value)
+      else
+        value
+      end
     end
   end
 
