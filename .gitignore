@@ -10,3 +10,4 @@
 vendor/
 test/fixtures
 .byebug_history
+*.gem

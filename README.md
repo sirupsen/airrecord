@@ -9,6 +9,11 @@ inviting inspiration from ActiveRecord's API.
 gem 'airrecord'
 ```
 
+This library is provided to enforce a mental model of a database, as described
+in [this post](http://sirupsen.com/minimum-viable-airtable/). Furthermore as an
+alternative to the [official
+library](https://github.com/airtable/airtable-ruby).
+
 ## Examples
 
 There's a simple API that allows more ad-hoc querying of Airtable:
@@ -70,3 +75,10 @@ tea = Tea.find(tea.id)
 puts tea[:hot_brews].first[:rating]
 # => "3 - Fine"
 ```
+
+## Contributing
+
+Contributions will be happily accepted in the form of Github Pull Requests!
+
+* Please ensure CI is passing before submitting your pull request for review.
+* Please provide tests that fail without your change.
