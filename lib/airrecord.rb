@@ -44,32 +44,6 @@ module Airrecord
         end
       end
 
-      def schema
-        # handle associations as specific field type
-        # TODO: what if there's an overlap in alias and keys??
-        schema = {}
-
-        records(paginate: false).each do |record|
-          record.fields.keys.each do |key|
-            unless schema.find { |column| column[:key] == key }
-              schema[key] = {
-                key: key,
-                type: :field,
-                alias: underscore(key),
-              }
-            end
-          end
-        end
-
-        if @associations
-          @associations.each do |assoc|
-            schema[assoc[:field]][:type] = :association
-          end
-        end
-
-        schema
-      end
-
       def records(filter: nil, sort: nil, view: nil, offset: nil, paginate: true, fields: nil)
         options = {}
         options[:filterByFormula] = filter if filter
