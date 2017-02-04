@@ -161,7 +161,7 @@ module Airrecord
     end
 
     def create
-      raise Error, "Record already exists" unless new_record?
+      raise Error, "Record already exists (record has an id)" unless new_record?
 
       body = { fields: serializable_fields }.to_json
       response = client.connection.post("/v0/#{self.class.base_key}/#{client.escape(self.class.table_name)}", body, { 'Content-Type': 'application/json' })
@@ -214,7 +214,10 @@ module Airrecord
     def serializable_fields(fields = self.fields)
       Hash[fields.map { |(key, value)|
         if association(key)
-          [key, value.map(&:id)]
+          assocs = value.map { |assoc|
+            assoc.respond_to?(:id) ? assoc.id : assoc
+          }
+          [key, assocs]
         else
           [key, value]
         end

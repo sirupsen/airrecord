@@ -53,4 +53,11 @@ class AssociationsTest < MiniTest::Test
     stub_find_request(tea, table: Tea, id: "rec1")
     assert_equal tea.id, brew[:tea].id
   end
+
+  def test_build_association_from_strings
+    tea = Tea.new({Name: "Jingning", Brews: ["rec2"]})
+    stub_post_request(tea, table: Tea)
+
+    tea.create
+  end
 end
