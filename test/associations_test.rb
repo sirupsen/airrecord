@@ -59,5 +59,8 @@ class AssociationsTest < MiniTest::Test
     stub_post_request(tea, table: Tea)
 
     tea.create
+
+    stub_find_request(Brew.new({}), table: Brew, id: "rec2")
+    assert_equal 1, tea[:brews].count
   end
 end
