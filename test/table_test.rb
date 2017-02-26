@@ -1,7 +1,7 @@
 require 'securerandom'
 require 'test_helper'
 
-class AirrecordTest < Minitest::Test
+class TableTest < Minitest::Test
   def setup
     @table = Airrecord.table("key1", "app1", "table1")
 
