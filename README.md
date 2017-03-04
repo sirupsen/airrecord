@@ -263,6 +263,14 @@ end
 p teas.find(teas.records.first.id)
 ```
 
+### Snake-cased helper methods
+
+When retrieving an existing record from Airtable, snake-cased helper names are
+available to index attributes. These are _only_ available on retrieved records,
+and _only_ if the column was set. If it's `nil`, it will not exist. That means
+if you want to set column that has a `nil` value for a column type, you'll have
+to fully type it out.
+
 ## Contributing
 
 Contributions will be happily accepted in the form of Github Pull Requests!
