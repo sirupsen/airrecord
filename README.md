@@ -20,17 +20,25 @@ class Tea < Airrecord::Table
   self.base_key = "app1"
   self.table_name = "Teas"
 
-  has_many :hot_brews, class: 'Brew', column: "Hot Brews"
+  has_many :brews, class: 'Brew', column: "Brews"
 
   def location
     [self[:village], self[:country], self[:region]].compact.join(", ")
   end
 end
 
+class Brew < Airrecord::Table
+  self.base_key = "app1"
+  self.table_name = "Hot Brews"
+
+  belongs_to :tea, class: 'Tea', column: 'Tea'
+end
+
 teas = Tea.all
 tea = teas.first
 tea[:country] # access atribute
 tea.location # instance methods
+tea[:brews] # associated brews
 ```
 
 ## Documentation
@@ -198,7 +206,7 @@ class Tea < Airrecord::Table
   self.base_key = "app1"
   self.table_name = "Teas"
 
-  has_many :hot_brews, class: 'Brew', column: "Brews"
+  has_many :brews, class: 'Brew', column: "Brews"
 end
 
 class Brew < Airrecord::Table
