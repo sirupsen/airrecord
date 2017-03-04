@@ -31,6 +31,13 @@ class TableTest < Minitest::Test
     assert_instance_of Array, @table.records
   end
 
+  def test_different_clients_with_different_api_keys
+    table1 = Airrecord.table("key1", "app1", "unknown")
+    table2 = Airrecord.table("key2", "app2", "unknown")
+
+    refute_equal table1.client, table2.client
+  end
+
   def test_filter_records
     stub_request([{"Name": "yes"}, {"Name": "no"}])
 

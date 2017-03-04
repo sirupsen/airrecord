@@ -19,7 +19,7 @@ end
 class AssociationsTest < MiniTest::Test
   def setup
     @stubs = Faraday::Adapter::Test::Stubs.new
-    Airrecord::Table.client.connection = Faraday.new { |builder|
+    Tea.client.connection = Faraday.new { |builder|
       builder.adapter :test, @stubs
     }
   end

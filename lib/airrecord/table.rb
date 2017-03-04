@@ -13,7 +13,8 @@ module Airrecord
       attr_accessor :base_key, :table_name, :api_key, :associations
 
       def client
-        @@client ||= Client.new(api_key)
+        @@clients ||= {}
+        @@clients[api_key] ||= Client.new(api_key)
       end
 
       def has_many(name, options)
