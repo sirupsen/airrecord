@@ -27,6 +27,10 @@ module Airrecord
         has_many(name, options.merge(single: true))
       end
 
+      def api_key
+        @api_key || Airrecord.api_key
+      end
+
       def find(id)
         response = client.connection.get("/v0/#{base_key}/#{client.escape(table_name)}/#{id}")
         parsed_response = client.parse(response.body)

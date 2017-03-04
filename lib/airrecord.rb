@@ -6,5 +6,7 @@ require "airrecord/client"
 require "airrecord/table"
 
 module Airrecord
+  extend self
   Error = Class.new(StandardError)
+  attr_accessor :api_key
 end

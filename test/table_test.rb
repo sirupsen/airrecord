@@ -1,8 +1,14 @@
 require 'securerandom'
 require 'test_helper'
 
+class Walrus < Airrecord::Table
+  self.base_key = 'app1'
+  self.table_name = 'walruses'
+end
+
 class TableTest < Minitest::Test
   def setup
+    Airrecord.api_key = "key2"
     @table = Airrecord.table("key1", "app1", "table1")
 
     @stubs = Faraday::Adapter::Test::Stubs.new
@@ -11,6 +17,14 @@ class TableTest < Minitest::Test
     }
 
     stub_request([{"Name": "omg", "Notes": "hello world", " Something  else\n" => "hi"}, {"Name": "more", "Notes": "walrus"}])
+  end
+
+  def test_table_overrides_key
+    assert_equal "key1", @table.api_key
+  end
+
+  def test_walrus_uses_default_key
+    assert_equal "key2", Walrus.api_key
   end
 
   def test_retrieve_records
