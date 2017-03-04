@@ -29,7 +29,7 @@ end
 
 class Brew < Airrecord::Table
   self.base_key = "app1"
-  self.table_name = "Hot Brews"
+  self.table_name = "Brews"
 
   belongs_to :tea, class: 'Tea', column: 'Tea'
 end
@@ -211,7 +211,7 @@ end
 
 class Brew < Airrecord::Table
   self.base_key = "app1"
-  self.table_name = "Hot Brews"
+  self.table_name = "Brews"
 
   belongs_to :tea, class: 'Tea', column: 'Tea'
 end
@@ -277,8 +277,3 @@ Contributions will be happily accepted in the form of Github Pull Requests!
 
 * Please ensure CI is passing before submitting your pull request for review.
 * Please provide tests that fail without your change.
-
-## TODO
-
-* Multiple clients if different api keys
-* Make save transparently call create if new
