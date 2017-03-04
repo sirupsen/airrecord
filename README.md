@@ -130,7 +130,7 @@ Tea.all(sort: { Type: "desc" })
 
 # Sort teas by price in descending order
 Tea.all(sort: { Price: "desc" })
-``
+```
 
 Note again that the key _must_ be the full column name. Snake-cased variants do
 not work here.
