@@ -41,6 +41,16 @@ tea.location # instance methods
 tea[:brews] # associated brews
 ```
 
+An ad-hoc API more in tune with the alternative API wrapper is also available:
+
+```ruby
+teas = Airrecord.table("key1", "app1", "Teas")
+teas.all.each do |record|
+  puts "#{record.id}: #{record[:name]}"
+end
+teas.find("rec3838")
+```
+
 ## Documentation
 
 ### Authentication
@@ -256,7 +266,7 @@ Airrtable provides a simple, ad-hoc API that will instantiate an anonymous
 ```ruby
 teas = Airrecord.table("key1", "app1", "Teas")
 
-teas.records.each do |record|
+teas.all.each do |record|
   puts "#{record.id}: #{record[:name]}"
 end
 
