@@ -110,7 +110,7 @@ To use `filterbyFormula` to filter returned records:
 
 ```ruby
 # Retrieve all teas from China
-Tea.all(filter: "{Country} == "China")
+Tea.all(filter: '{Country} == "China"')
 
 # Retrieve all teas created in the past week
 Tea.all(filter: "DATETIME_DIFF(CREATED_TIME(), TODAY(), 'days') < 7")
@@ -190,8 +190,8 @@ tea = Tea.find("someid")
 tea[:name] = "Feng Gang Organic"
 
 # Since the Village column is not set, we do not have access to a snake-cased
-variant since the mapping is not determined. For all we know, the correct column
-name could be "VilLlaGe". Therefore, we must use the proper column name.
+# variant since the mapping is not determined. For all we know, the correct column
+# name could be "VilLlaGe". Therefore, we must use the proper column name.
 tea["Village"] = "Feng Gang"
 
 tea.save # persist to Airtable
