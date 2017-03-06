@@ -41,14 +41,16 @@ tea.location # instance methods
 tea[:brews] # associated brews
 ```
 
-An ad-hoc API more in tune with the alternative API wrapper is also available:
+A short-hand API for definitions and more ad-hoc querying is also available:
 
 ```ruby
-teas = Airrecord.table("key1", "app1", "Teas")
-teas.all.each do |record|
+Tea = Airrecord.table("api_key", "app_key", "Teas")
+
+Tea.all.each do |record|
   puts "#{record.id}: #{record[:name]}"
 end
-teas.find("rec3838")
+
+Tea.find("rec3838")
 ```
 
 ## Documentation
@@ -262,15 +264,17 @@ Brew.create("Tea" => tea, "Temperature" => "80", "Time" => "4m", "Rating" => "5"
 
 Airrtable provides a simple, ad-hoc API that will instantiate an anonymous
 `Airrecord::Table` for you on the fly with the configured key, app, and table.
+This is useful if you require no custom definitions, or you're just playing
+around.
 
 ```ruby
-teas = Airrecord.table("key1", "app1", "Teas")
+Tea = Airrecord.table("api_key", "app_key", "Teas")
 
-teas.all.each do |record|
+Tea.all.each do |record|
   puts "#{record.id}: #{record[:name]}"
 end
 
-p teas.find(teas.records.first.id)
+Tea.find("rec3838")
 ```
 
 ### Snake-cased helper methods
