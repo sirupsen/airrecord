@@ -22,8 +22,20 @@ class Tea < Airrecord::Table
 
   has_many :brews, class: 'Brew', column: "Brews"
 
+  def self.chinese
+    all(filter: '{Country} == "China"')
+  end
+
+  def self.cheapest_and_best
+    all(sort: { "Rating" => "desc", "Price" => "asc" })
+  end
+
   def location
     [self[:village], self[:country], self[:region]].compact.join(", ")
+  end
+
+  def green?
+    self[:type] == "Green"
   end
 end
 
@@ -32,6 +44,14 @@ class Brew < Airrecord::Table
   self.table_name = "Brews"
 
   belongs_to :tea, class: 'Tea', column: 'Tea'
+
+  def self.hot
+    all(filter: "{Temperature} > 90")
+  end
+
+  def done_brewing?
+    self[:created_at] + self[:duration] > Time.now
+  end
 end
 
 teas = Tea.all
