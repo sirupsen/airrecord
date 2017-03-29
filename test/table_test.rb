@@ -290,4 +290,11 @@ class TableTest < Minitest::Test
 
     assert_equal alpha, beta
   end
+
+  def test_comparison_different_classes
+    alpha = @table.new("Name": "Name", "Created": Time.at(0))
+    beta = Walrus.new("Name": "Name", "Created": Time.at(0))
+
+    refute_equal alpha, beta
+  end
 end
