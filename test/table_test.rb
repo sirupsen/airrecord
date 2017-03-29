@@ -285,14 +285,8 @@ class TableTest < Minitest::Test
   end
 
   def test_comparison
-    alpha = @table.new(
-      "Name": "Name",
-      "Created": Time.at(0),
-    )
-    beta = @table.new(
-      "Name": "Name",
-      "Created": Time.at(0),
-    )
+    alpha = @table.new("Name": "Name", "Created": Time.at(0))
+    beta = @table.new("Name": "Name", "Created": Time.at(0))
 
     assert_equal alpha, beta
   end
