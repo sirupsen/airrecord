@@ -197,6 +197,11 @@ module Airrecord
       }]
     end
 
+    def ==(other)
+      self.class == other.class &&
+        serializable_fields == other.serializable_fields
+    end
+
     protected
 
     def association(key)
