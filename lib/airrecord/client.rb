@@ -1,3 +1,5 @@
+require 'uri'
+
 module Airrecord
   class Client
     attr_reader :api_key
