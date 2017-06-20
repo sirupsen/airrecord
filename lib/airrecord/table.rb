@@ -186,17 +186,18 @@ module Airrecord
 
     def serializable_fields(fields = self.fields)
       Hash[fields.map { |(key, value)|
-        if association(key)
-          assocs = value.map { |assoc|
-            assoc.respond_to?(:id) ? assoc.id : assoc
-          }
-          [key, assocs]
-        else
-          [key, value]
-        end
-      }]
+             if association(key)
+               value = [value] unless value.respond_to?(:map)
+               assocs = value.map { |assoc|
+                 assoc.respond_to?(:id) ? assoc.id : assoc
+               }               
+               [key, assocs]
+             else
+               [key, value]
+             end
+           }]
     end
-
+    
     def ==(other)
       self.class == other.class &&
         serializable_fields == other.serializable_fields
