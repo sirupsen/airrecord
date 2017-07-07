@@ -4,6 +4,15 @@ require 'test_helper'
 class Walrus < Airrecord::Table
   self.base_key = 'app1'
   self.table_name = 'walruses'
+
+  has_many :feet, class: 'Foot', column: 'Feet'
+end
+
+class Foot < Airrecord::Table
+  self.base_key = 'app1'
+  self.table_name = 'foot'
+
+  belongs_to :walrus, class: 'Walrus', column: 'Walrus'
 end
 
 class TableTest < Minitest::Test
@@ -296,5 +305,12 @@ class TableTest < Minitest::Test
     beta = Walrus.new("Name": "Name", "Created": Time.at(0))
 
     refute_equal alpha, beta
+  end
+
+  def test_association_accepts_non_enumerable
+    walrus = Walrus.new("Name": "Wally")    
+    foot = Foot.new("Name": "FrontRight", "walrus": walrus)
+
+    foot.serializable_fields
   end
 end
