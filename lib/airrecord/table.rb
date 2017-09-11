@@ -187,7 +187,7 @@ module Airrecord
     def serializable_fields(fields = self.fields)
       Hash[fields.map { |(key, value)|
         if association(key)
-          value = Array.new {value} unless value.is_a?(Enumerable)
+          value = [ value ] unless value.is_a?(Enumerable)
           assocs = value.map { |assoc|
             assoc.respond_to?(:id) ? assoc.id : assoc
           }               
