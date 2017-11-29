@@ -23,7 +23,7 @@ class Tea < Airrecord::Table
   has_many :brews, class: 'Brew', column: "Brews"
 
   def self.chinese
-    all(filter: '{Country} == "China"')
+    all(filter: '{Country} = "China"')
   end
 
   def self.cheapest_and_best
