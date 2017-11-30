@@ -43,7 +43,7 @@ module Airrecord
         end
       end
 
-      def records(filter: nil, sort: nil, view: nil, offset: nil, paginate: true, fields: nil)
+      def records(filter: nil, sort: nil, view: nil, offset: nil, paginate: true, fields: nil, maxrecords: nil, pagesize: nil)
         options = {}
         options[:filterByFormula] = filter if filter
 
@@ -56,6 +56,8 @@ module Airrecord
         options[:view] = view if view
         options[:offset] = offset if offset
         options[:fields] = fields if fields
+        options[:maxRecords] = maxrecords if maxrecords
+        options[:pageSize] = pagesize if pagesize
 
         path = "/v0/#{base_key}/#{client.escape(table_name)}"
         response = client.connection.get(path, options)
@@ -75,6 +77,8 @@ module Airrecord
               paginate: paginate,
               fields: fields,
               offset: parsed_response["offset"],
+              maxrecords: maxrecords,
+              pagesize: pagesize,
             ))
           end
 
