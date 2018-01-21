@@ -229,6 +229,39 @@ tea = Tea.find("rec839")
 tea.destroy # deletes record
 ```
 
+### File Uploads
+
+Airtable's API requires you to have uploaded your file to an intermediary and
+providing the URL. Unfortunately, it does not allow uploading directly.
+
+```ruby
+word = World.find("cantankerous")
+word["Pronounciation"] = [{url: "https://s3.ca-central-1.amazonaws.com/word-pronunciations/cantankerous.mp3}]
+word.save
+```
+
+S3 is a good place to upload files for Airtable. Airrecord does not support this
+directly, but the snippet below may be helpful:
+
+```ruby
+# Add this to your gemfile
+# Full docs at https://docs.aws.amazon.com/sdkforruby/api/Aws/S3/Client.html
+require 'aws-sdk-s3'
+
+Aws.config.update(
+  credentials: Aws::Credentials.new(access_key, secret_key) # obtain from AWS
+  region: 'ca-central-1', # region
+)
+
+s3 = Aws::S3::Client.new
+s3.put_object({
+  body: File.open("cantankerous.mp3"), # IO object
+  bucket: 'word-pronunciations',
+  key: 'cantankerous.mp3',
+  acl: "public-read",
+})
+```
+
 ### Associations
 
 Airrecord supports managing associations between tables by linking
