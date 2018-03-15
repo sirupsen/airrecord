@@ -90,7 +90,7 @@ module Airrecord
       alias_method :all, :records
     end
 
-    attr_reader :fields, :column_mappings, :id, :created_at, :updated_fields
+    attr_reader :fields, :column_mappings, :id, :created_at, :updated_keys
 
     def initialize(fields, id: nil, created_at: nil)
       @id = id
@@ -126,9 +126,11 @@ module Airrecord
 
     def []=(key, value)
       if fields[key]
+        return if fields[key] == value # no-op
         @updated_keys << key
         fields[key] = value
       elsif column_mappings[key]
+        return if fields[column_mappings[key]] == value # no-op
         @updated_keys << column_mappings[key]
         fields[column_mappings[key]] = value
       else

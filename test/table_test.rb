@@ -313,4 +313,10 @@ class TableTest < Minitest::Test
 
     foot.serializable_fields
   end
+
+  def test_dont_update_if_equal
+    walrus = Walrus.new("Name": "Wally")
+    walrus[:name] = "Wally"
+    assert walrus.updated_keys.empty?
+  end
 end
