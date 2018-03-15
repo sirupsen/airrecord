@@ -1,3 +1,7 @@
+# 0.2.4
+
+* Don't flag as dirty if change is equal
+
 # 0.2.3
 
 * Allow single associations (#12)
