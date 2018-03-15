@@ -313,7 +313,8 @@ You can easily associate records with each other:
 ```ruby
 tea = Tea.find('rec849829')
 # This will create a brew associated with the specific tea
-Brew.create("Tea" => tea, "Temperature" => "80", "Time" => "4m", "Rating" => "5")
+brew = Brew.new("Tea" => tea, "Temperature" => "80", "Time" => "4m", "Rating" => "5")
+brew.create
 ```
 
 ### Ad-hoc API

@@ -11,7 +11,7 @@ Gem::Specification.new do |spec|
 
   spec.summary       = %q{Airtable client}
   spec.description   = %q{Airtable client to make Airtable interactions a breeze}
-  spec.homepage      = "https://github.com/sirupsen/airtable"
+  spec.homepage      = "https://github.com/sirupsen/airrecord"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
