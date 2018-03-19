@@ -171,7 +171,7 @@ module Airrecord
       parsed_response = client.parse(response.body)
 
       if response.success?
-        self.fields = parsed_response
+        self.fields = parsed_response["fields"]
       else
         client.handle_error(response.status, parsed_response)
       end
