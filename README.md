@@ -130,13 +130,13 @@ To use `filterbyFormula` to filter returned records:
 
 ```ruby
 # Retrieve all teas from China
-Tea.all(filter: '{Country} == "China"')
+Tea.all(filter: '{Country} = "China"')
 
 # Retrieve all teas created in the past week
 Tea.all(filter: "DATETIME_DIFF(CREATED_TIME(), TODAY(), 'days') < 7")
 
 # Retrieve all teas that don't have a country defined
-Tea.all(filter: "{Country} == \"\"")
+Tea.all(filter: "{Country} = \"\"")
 ```
 
 This filtering can, of course, also be done in Ruby directly after calling
