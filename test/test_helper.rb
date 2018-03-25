@@ -29,7 +29,9 @@ class Minitest::Test
   end
 
   def stub_patch_request(record, updated_keys, table: @table1, status: 200, headers: {}, return_body: nil)
-    return_body ||= record.fields
+    return_body ||= {
+      fields: record.fields
+    }
     return_body = return_body.to_json
 
     request_body = {
@@ -37,7 +39,6 @@ class Minitest::Test
         [key, record.fields[key]]
       }]
     }.to_json
-
     @stubs.patch("/v0/#{@table.base_key}/#{@table.table_name}/#{record.id}", request_body) do |env|
       [status, headers, return_body]
     end

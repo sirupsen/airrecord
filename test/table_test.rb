@@ -153,7 +153,7 @@ class TableTest < Minitest::Test
     record = first_record
 
     record[:name] = "new_name"
-    stub_patch_request(record, ["Name"], return_body: record.fields.merge("Notes" => "new animal"))
+    stub_patch_request(record, ["Name"], return_body: { fields: record.fields.merge("Notes" => "new animal") })
 
     assert record.save
     assert_equal "new_name", record[:name]
@@ -308,7 +308,7 @@ class TableTest < Minitest::Test
   end
 
   def test_association_accepts_non_enumerable
-    walrus = Walrus.new("Name": "Wally")    
+    walrus = Walrus.new("Name": "Wally")
     foot = Foot.new("Name": "FrontRight", "walrus": walrus)
 
     foot.serializable_fields
