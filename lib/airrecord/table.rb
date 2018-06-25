@@ -44,12 +44,12 @@ module Airrecord
       end
 
       def records(filter: nil, sort: nil, view: nil, offset: nil, paginate: true, fields: nil, max_records: nil, page_size: nil)
-        options = {}
+        options = {}.compare_by_identity
         options[:filterByFormula] = filter if filter
 
         if sort
-          options[:sort] = sort.map { |field, direction|
-            { field: field.to_s, direction: direction }
+          sort.each { |field, direction|
+            options["sort"] = [{ field: field.to_s, direction: direction }]
           }
         end
 
