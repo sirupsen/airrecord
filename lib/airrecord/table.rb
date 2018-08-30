@@ -196,17 +196,25 @@ module Airrecord
           value = [ value ] unless value.is_a?(Enumerable)
           assocs = value.map { |assoc|
             assoc.respond_to?(:id) ? assoc.id : assoc
-          }               
+          }
           [key, assocs]
         else
           [key, value]
         end
         }]
     end
-    
+
     def ==(other)
       self.class == other.class &&
         serializable_fields == other.serializable_fields
+    end
+
+    def eql?(other)
+      self == other
+    end
+
+    def hash
+      serializable_fields.hash
     end
 
     protected
