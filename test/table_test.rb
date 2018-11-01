@@ -25,7 +25,7 @@ class TableTest < Minitest::Test
       builder.adapter :test, @stubs
     }
 
-    stub_request([{"Name": "omg", "Notes": "hello world", " Something  else\n" => "hi"}, {"Name": "more", "Notes": "walrus"}])
+    stub_request([{"Name" => "omg", "Notes" => "hello world", " Something  else\n" => "hi"}, {"Name" => "more", "Notes" => "walrus"}])
   end
 
   def test_table_overrides_key
@@ -48,48 +48,48 @@ class TableTest < Minitest::Test
   end
 
   def test_filter_records
-    stub_request([{"Name": "yes"}, {"Name": "no"}])
+    stub_request([{"Name" => "yes"}, {"Name" => "no"}])
 
     records = @table.records(filter: "Name")
-    assert_equal "yes", records[0][:name]
+    assert_equal "yes", records[0]["Name"]
   end
 
   def test_sort_records
-    stub_request([{"Name": "a"}, {"Name": "b"}])
+    stub_request([{"Name" => "a"}, {"Name" => "b"}])
 
-    records = @table.records(sort: { Name: 'asc' })
-    assert_equal "a", records[0][:name]
-    assert_equal "b", records[1][:name]
+    records = @table.records(sort: { "Name" => 'asc' })
+    assert_equal "a", records[0]["Name"]
+    assert_equal "b", records[1]["Name"]
   end
 
   def test_view_records
-    stub_request([{"Name": "a"}, {"Name": "a"}])
+    stub_request([{"Name" => "a"}, {"Name" => "a"}])
 
     records = @table.records(view: 'A')
-    assert_equal "a", records[0][:name]
-    assert_equal "a", records[1][:name]
+    assert_equal "a", records[0]["Name"]
+    assert_equal "a", records[1]["Name"]
   end
 
   def test_follow_pagination_by_default
-    stub_request([{"Name": "1"}, {"Name": "2"}], offset: 'dasfuhiu')
-    stub_request([{"Name": "3"}, {"Name": "4"}], offset: 'odjafio', clear: false)
-    stub_request([{"Name": "5"}, {"Name": "6"}], clear: false)
+    stub_request([{"Name" => "1"}, {"Name" => "2"}], offset: 'dasfuhiu')
+    stub_request([{"Name" => "3"}, {"Name" => "4"}], offset: 'odjafio', clear: false)
+    stub_request([{"Name" => "5"}, {"Name" => "6"}], clear: false)
 
     records = @table.records
     assert_equal 6, records.size
   end
 
   def test_dont_follow_pagination_if_disabled
-    stub_request([{"Name": "1"}, {"Name": "2"}], offset: 'dasfuhiu')
-    stub_request([{"Name": "3"}, {"Name": "4"}], offset: 'odjafio', clear: false)
-    stub_request([{"Name": "5"}, {"Name": "6"}], clear: false)
+    stub_request([{"Name" => "1"}, {"Name" => "2"}], offset: 'dasfuhiu')
+    stub_request([{"Name" => "3"}, {"Name" => "4"}], offset: 'odjafio', clear: false)
+    stub_request([{"Name" => "5"}, {"Name" => "6"}], clear: false)
 
     records = @table.records(paginate: false)
     assert_equal 2, records.size
   end
 
   def test_index_by_normalized_name
-    assert_equal "omg", first_record[:name]
+    assert_equal "omg", first_record["Name"]
   end
 
   def test_index_by_column_name
@@ -120,20 +120,20 @@ class TableTest < Minitest::Test
 
   def test_change_value
     record = first_record
-    record[:name] = "testest"
-    assert_equal "testest", record[:name]
+    record["Name"] = "testest"
+    assert_equal "testest", record["Name"]
   end
 
   def test_change_value_on_column_name
     record = first_record
     record["Name"] = "testest"
-    assert_equal "testest", record[:name]
+    assert_equal "testest", record["Name"]
   end
 
   def test_change_value_and_update
     record = first_record
 
-    record[:name] = "new_name"
+    record["Name"] = "new_name"
     stub_patch_request(record, ["Name"])
 
     assert record.save
@@ -142,7 +142,7 @@ class TableTest < Minitest::Test
   def test_change_value_then_save_again_should_noop
     record = first_record
 
-    record[:name] = "new_name"
+    record["Name"] = "new_name"
     stub_patch_request(record, ["Name"])
 
     assert record.save
@@ -152,18 +152,18 @@ class TableTest < Minitest::Test
   def test_updates_fields_to_newest_values_after_update
     record = first_record
 
-    record[:name] = "new_name"
+    record["Name"] = "new_name"
     stub_patch_request(record, ["Name"], return_body: record.fields.merge("Notes" => "new animal"))
 
     assert record.save
-    assert_equal "new_name", record[:name]
+    assert_equal "new_name", record["Name"]
     assert_equal "new animal", record[:notes]
   end
 
   def test_update_failure
     record = first_record
 
-    record[:name] = "new_name"
+    record["Name"] = "new_name"
     stub_patch_request(record, ["Name"], return_body: { error: { type: "oh noes", message: 'yes' } }, status: 401)
 
     assert_raises Airrecord::Error do
@@ -174,7 +174,7 @@ class TableTest < Minitest::Test
   def test_update_failure_then_succeed
     record = first_record
 
-    record[:name] = "new_name"
+    record["Name"] = "new_name"
     stub_patch_request(record, ["Name"], return_body: { error: { type: "oh noes", message: 'yes' } }, status: 401)
 
     assert_raises Airrecord::Error do
@@ -186,7 +186,7 @@ class TableTest < Minitest::Test
   end
 
   def test_update_raises_if_new_record
-    record = @table.new(Name: "omg")
+    record = @table.new("Name" => "omg")
 
     assert_raises Airrecord::Error do
       record.save
@@ -198,7 +198,7 @@ class TableTest < Minitest::Test
   end
 
   def test_build_new_record
-    record = @table.new(Name: "omg")
+    record = @table.new("Name" => "omg")
 
     refute record.id
     refute record.created_at
@@ -206,7 +206,7 @@ class TableTest < Minitest::Test
   end
 
   def test_create_new_record
-    record = @table.new(Name: "omg")
+    record = @table.new("Name" => "omg")
 
     stub_post_request(record)
 
@@ -214,7 +214,7 @@ class TableTest < Minitest::Test
   end
 
   def test_create_existing_record_fails
-    record = @table.new(Name: "omg")
+    record = @table.new("Name" => "omg")
 
     stub_post_request(record)
 
@@ -226,7 +226,7 @@ class TableTest < Minitest::Test
   end
 
   def test_create_handles_error
-    record = @table.new(Name: "omg")
+    record = @table.new("Name" => "omg")
 
     stub_post_request(record, status: 401, return_body: { error: { type: "omg", message: "wow" }})
 
@@ -236,12 +236,12 @@ class TableTest < Minitest::Test
   end
 
   def test_find
-    record = @table.new(Name: "walrus")
+    record = @table.new("Name" => "walrus")
 
     stub_find_request(record, id: "iodfajsofja")
 
     record = @table.find("iodfajsofja")
-    assert_equal "walrus", record[:name]
+    assert_equal "walrus", record["Name"]
     assert_equal "iodfajsofja", record.id
   end
 
@@ -254,7 +254,7 @@ class TableTest < Minitest::Test
   end
 
   def test_destroy_new_record_fails
-    record = @table.new(Name: "walrus")
+    record = @table.new("Name" => "walrus")
 
     assert_raises Airrecord::Error do
       record.destroy
@@ -287,36 +287,36 @@ class TableTest < Minitest::Test
   end
 
   def test_dates_are_type_casted
-    stub_request([{"Name": "omg", "Created": Time.now.to_s}])
+    stub_request([{"Name" => "omg", "Created" => Time.now.to_s}])
 
     record = first_record
     assert_instance_of Time, record[:created]
   end
 
   def test_comparison
-    alpha = @table.new("Name": "Name", "Created": Time.at(0))
-    beta = @table.new("Name": "Name", "Created": Time.at(0))
+    alpha = @table.new("Name" => "Name", "Created" => Time.at(0))
+    beta = @table.new("Name" => "Name", "Created" => Time.at(0))
 
     assert_equal alpha, beta
   end
 
   def test_comparison_different_classes
-    alpha = @table.new("Name": "Name", "Created": Time.at(0))
-    beta = Walrus.new("Name": "Name", "Created": Time.at(0))
+    alpha = @table.new("Name" => "Name", "Created" => Time.at(0))
+    beta = Walrus.new("Name" => "Name", "Created" => Time.at(0))
 
     refute_equal alpha, beta
   end
 
   def test_association_accepts_non_enumerable
-    walrus = Walrus.new("Name": "Wally")    
-    foot = Foot.new("Name": "FrontRight", "walrus": walrus)
+    walrus = Walrus.new("Name" => "Wally")    
+    foot = Foot.new("Name" => "FrontRight", "walrus" => walrus)
 
     foot.serializable_fields
   end
 
   def test_dont_update_if_equal
-    walrus = Walrus.new("Name": "Wally")
-    walrus[:name] = "Wally"
+    walrus = Walrus.new("Name" => "Wally")
+    walrus["Name"] = "Wally"
     assert walrus.updated_keys.empty?
   end
 end

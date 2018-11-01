@@ -25,9 +25,9 @@ class AssociationsTest < MiniTest::Test
   end
 
   def test_has_many_associations
-    tea = Tea.new(Name: "Dong Ding", Brews: ["rec2"])
+    tea = Tea.new("Name" => "Dong Ding", "Brews" => ["rec2"])
 
-    record = Brew.new(Name: "Good brew")
+    record = Brew.new("Name" => "Good brew")
     stub_find_request(record, id: "rec2", table: Brew)
 
     assert_equal 1, tea[:brews].size
@@ -36,16 +36,16 @@ class AssociationsTest < MiniTest::Test
   end
 
   def test_belongs_to
-    brew = Brew.new(Name: "Good Brew", Tea: ["rec1"])
-    tea = Tea.new(Name: "Dong Ding", Brews: ["rec2"])
+    brew = Brew.new("Name" => "Good Brew", "Tea" => ["rec1"])
+    tea = Tea.new("Name" => "Dong Ding", "Brews" => ["rec2"])
     stub_find_request(tea, table: Tea, id: "rec1")
 
     assert_equal "rec1", brew[:tea].id
   end
 
   def test_build_association_and_post_id
-    tea = Tea.new({Name: "Jingning", Brews: []}, id: "rec1")
-    brew = Brew.new(Name: "greeaat", Tea: [tea])
+    tea = Tea.new({"Name" => "Jingning", "Brews" => []}, id: "rec1")
+    brew = Brew.new("Name" => "greeaat", "Tea" => [tea])
     stub_post_request(brew, table: Brew)
 
     brew.create
@@ -55,7 +55,7 @@ class AssociationsTest < MiniTest::Test
   end
 
   def test_build_association_from_strings
-    tea = Tea.new({Name: "Jingning", Brews: ["rec2"]})
+    tea = Tea.new({"Name" => "Jingning", "Brews" => ["rec2"]})
     stub_post_request(tea, table: Tea)
 
     tea.create
