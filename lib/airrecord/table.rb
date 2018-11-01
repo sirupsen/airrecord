@@ -125,7 +125,6 @@ module Airrecord
         value = fields[key]
       elsif column_mappings[key]
         deprecate_symbols if key.is_a? Symbol
-        deprecate_symbols
         value = fields[column_mappings[key]]
       end
 
@@ -151,7 +150,7 @@ module Airrecord
       elsif column_mappings[key]
         deprecate_symbols
         return if fields[column_mappings[key]] == value # no-op
-        @updated_keys << key
+        @updated_keys << column_mappings[key]
         fields[column_mappings[key]] = value
       else
         @updated_keys << key
