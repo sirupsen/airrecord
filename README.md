@@ -20,7 +20,7 @@ class Tea < Airrecord::Table
   self.base_key = "app1"
   self.table_name = "Teas"
 
-  has_many :brews, class: 'Brew', column: "Brews"
+  has_many "Brews", class: 'Brew', column: "Brews"
 
   def self.chinese
     all(filter: '{Country} = "China"')
@@ -43,7 +43,7 @@ class Brew < Airrecord::Table
   self.base_key = "app1"
   self.table_name = "Brews"
 
-  belongs_to :tea, class: 'Tea', column: 'Tea'
+  belongs_to "Tea", class: 'Tea', column: 'Tea'
 
   def self.hot
     all(filter: "{Temperature} > 90")
@@ -58,7 +58,7 @@ teas = Tea.all
 tea = teas.first
 tea["Country"] # access atribute
 tea.location # instance methods
-tea[:brews] # associated brews
+tea["Brews"] # associated brews
 ```
 
 A short-hand API for definitions and more ad-hoc querying is also available:
@@ -268,14 +268,14 @@ class Tea < Airrecord::Table
   self.base_key = "app1"
   self.table_name = "Teas"
 
-  has_many :brews, class: 'Brew', column: "Brews"
+  has_many "Brews", class: 'Brew', column: "Brews"
 end
 
 class Brew < Airrecord::Table
   self.base_key = "app1"
   self.table_name = "Brews"
 
-  belongs_to :tea, class: 'Tea', column: 'Tea'
+  belongs_to "Tea", class: 'Tea', column: 'Tea'
 end
 ```
 
@@ -290,14 +290,14 @@ To retrieve records from associations to a record:
 
 ```ruby
 tea = Tea.find('rec84')
-tea[:brews] # brews associated with tea
+tea["Brews"] # brews associated with tea
 ```
 
 This in turn works the other way too:
 
 ```ruby
 brew = Brew.find('rec849')
-brew[:tea] # the associated tea instance
+brew["Tea"] # the associated tea instance
 ```
 
 ### Creating associated records

@@ -25,7 +25,7 @@ class TableTest < Minitest::Test
       builder.adapter :test, @stubs
     }
 
-    stub_request([{"Name" => "omg", "Notes" => "hello world", " Something  else\n" => "hi"}, {"Name" => "more", "Notes" => "walrus"}])
+    stub_request([{"Name" => "omg", "Notes" => "hello world"}, {"Name" => "more", "Notes" => "walrus"}])
   end
 
   def test_table_overrides_key
@@ -96,10 +96,6 @@ class TableTest < Minitest::Test
     assert_equal "omg", first_record["Name"]
   end
 
-  def test_cleans_bad_keys
-    assert_equal "hi", first_record[:something_else]
-  end
-
   def test_id
     assert_instance_of String, first_record.id
   end
@@ -157,7 +153,7 @@ class TableTest < Minitest::Test
 
     assert record.save
     assert_equal "new_name", record["Name"]
-    assert_equal "new animal", record[:notes]
+    assert_equal "new animal", record["Notes"]
   end
 
   def test_update_failure
@@ -290,7 +286,7 @@ class TableTest < Minitest::Test
     stub_request([{"Name" => "omg", "Created" => Time.now.to_s}])
 
     record = first_record
-    assert_instance_of Time, record[:created]
+    assert_instance_of Time, record["Created"]
   end
 
   def test_comparison

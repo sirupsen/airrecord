@@ -16,14 +16,14 @@ module Airrecord
 
   class Table
     def deprecate_symbols
-      puts "Using symbols with airrecord is deprecated. Please use strings. This will break in a future version."
+      warn Kernel.caller.first + ": warning: Using symbols with airrecord is deprecated."
     end
 
     class << self
       attr_accessor :base_key, :table_name, :api_key, :associations
 
       def deprecate_symbols
-        puts "Using symbols with airrecord is deprecated. Please use strings. This will break in a future version."
+        warn Kernel.caller.first + ": warning: Using symbols with airrecord is deprecated."
       end
       
       def client
@@ -118,12 +118,13 @@ module Airrecord
     end
 
     def [](key)
-      deprecate_symbols if key.is_a? Symbol
       value = nil
 
       if fields[key]
+        deprecate_symbols if key.is_a? Symbol
         value = fields[key]
       elsif column_mappings[key]
+        deprecate_symbols if key.is_a? Symbol
         deprecate_symbols
         value = fields[column_mappings[key]]
       end
