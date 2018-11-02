@@ -1,3 +1,7 @@
+# 1.0.0 (unreleased)
+
+* 1.0.0 will introduce breaking changes, including removing support for symbols. To update, change snake-case symbols to their correct column names (for example, `record["First Name"]` instead of `record[:first_name]`)
+
 # 0.2.5
 
 * Deprecate using symbols instead of strings
