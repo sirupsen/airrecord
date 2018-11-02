@@ -8,10 +8,24 @@ module Airrecord
   # Right now I bet there's a bunch of bugs around similar named column keys (in
   # terms of capitalization), it's inconsistent and non-obvious that `create`
   # doesn't use the same column keys as everything else.
+  #
+  # 2018-11-01
+  # deprecate_symbols: long-term plan is to force everyone to use raw strings,
+  # to match the Airtable behavior. For now we'll just warn when using symbols
+  # with a deprecation notice.
+
   class Table
+    def deprecate_symbols
+      self.class.deprecate_symbols
+    end
+
     class << self
       attr_accessor :base_key, :table_name, :api_key, :associations
 
+      def deprecate_symbols
+        warn Kernel.caller.first + ": warning: Using symbols with airrecord is deprecated."
+      end
+      
       def client
         @@clients ||= {}
         @@clients[api_key] ||= Client.new(api_key)
@@ -20,7 +34,7 @@ module Airrecord
       def has_many(name, options)
         @associations ||= []
         @associations << {
-          field: name.to_sym,
+          field: name.to_sym, # todo: deprecate_symbols
         }.merge(options)
       end
 
@@ -49,6 +63,7 @@ module Airrecord
 
         if sort
           options[:sort] = sort.map { |field, direction|
+            deprecate_symbols if field.is_a? Symbol
             { field: field.to_s, direction: direction }
           }
         end
@@ -106,8 +121,10 @@ module Airrecord
       value = nil
 
       if fields[key]
+        deprecate_symbols if key.is_a? Symbol
         value = fields[key]
       elsif column_mappings[key]
+        deprecate_symbols if key.is_a? Symbol
         value = fields[column_mappings[key]]
       end
 
@@ -125,11 +142,13 @@ module Airrecord
     end
 
     def []=(key, value)
+      deprecate_symbols if key.is_a? Symbol
       if fields[key]
         return if fields[key] == value # no-op
         @updated_keys << key
         fields[key] = value
       elsif column_mappings[key]
+        deprecate_symbols
         return if fields[column_mappings[key]] == value # no-op
         @updated_keys << column_mappings[key]
         fields[column_mappings[key]] = value
@@ -221,15 +240,15 @@ module Airrecord
 
     def fields=(fields)
       @updated_keys = []
-      @column_mappings = Hash[fields.keys.map { |key| [underscore(key), key] }]
+      @column_mappings = Hash[fields.keys.map { |key| [underscore(key), key] }] # TODO remove (deprecate_symbols)
       @fields = fields
     end
 
-    def self.underscore(key)
+    def self.underscore(key) # TODO remove (deprecate_symbols)
       key.to_s.strip.gsub(/\W+/, "_").downcase.to_sym
     end
 
-    def underscore(key)
+    def underscore(key) # TODO remove (deprecate_symbols)
       self.class.underscore(key)
     end
 
@@ -249,6 +268,7 @@ module Airrecord
         value
       end
     end
+
   end
 
   def self.table(api_key, base_key, table_name)
