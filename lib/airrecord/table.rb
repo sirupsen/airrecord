@@ -16,7 +16,7 @@ module Airrecord
 
   class Table
     def deprecate_symbols
-      warn Kernel.caller.first + ": warning: Using symbols with airrecord is deprecated."
+      self.class.deprecate_symbols
     end
 
     class << self
