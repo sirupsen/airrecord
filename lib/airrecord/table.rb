@@ -57,6 +57,12 @@ module Airrecord
         end
       end
 
+      def find_many(ids)
+        or_args = ids.map { |id| "RECORD_ID() = '#{id}'"}.join(',')
+        formula = "OR(#{or_args})"
+        records(filter: formula).sort_by { |record| or_args.index(record.id) }
+      end
+
       def records(filter: nil, sort: nil, view: nil, offset: nil, paginate: true, fields: nil, max_records: nil, page_size: nil)
         options = {}
         options[:filterByFormula] = filter if filter
