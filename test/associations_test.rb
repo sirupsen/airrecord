@@ -5,7 +5,7 @@ class Tea < Airrecord::Table
   self.base_key = "app1"
   self.table_name = "Teas"
 
-  has_many "Brews", class: "Brew", column: "Brews"
+  has_many :brews, class: "Brew", column: "Brews"
 end
 
 class Brew < Airrecord::Table
@@ -13,7 +13,7 @@ class Brew < Airrecord::Table
   self.base_key = "app1"
   self.table_name = "Brews"
 
-  belongs_to "Tea", class: "Tea", column: "Tea"
+  belongs_to :tea, class: "Tea", column: "Tea"
 end
 
 class AssociationsTest < MiniTest::Test
@@ -25,14 +25,17 @@ class AssociationsTest < MiniTest::Test
   end
 
   def test_has_many_associations
-    tea = Tea.new("Name" => "Dong Ding", "Brews" => ["rec2"])
+    tea = Tea.new("Name" => "Dong Ding", "Brews" => ["rec2", "rec1"])
 
-    record = Brew.new("Name" => "Good brew")
-    stub_find_request(record, id: "rec2", table: Brew)
+    brews = [
+      { "id" => "rec2", "Name" => "Good brew" },
+      { "id" => "rec1", "Name" => "Decent brew" }
+    ]
+    stub_request(brews, table: Brew)
 
-    assert_equal 1, tea["Brews"].size
-    assert_kind_of Airrecord::Table, tea["Brews"].first
-    assert_equal "rec2", tea["Brews"].first.id
+    assert_equal 2, tea.brews.size
+    assert_kind_of Airrecord::Table, tea.brews.first
+    assert_equal "rec1", tea.brews.first.id
   end
 
   def test_belongs_to
@@ -40,7 +43,7 @@ class AssociationsTest < MiniTest::Test
     tea = Tea.new("Name" => "Dong Ding", "Brews" => ["rec2"])
     stub_find_request(tea, table: Tea, id: "rec1")
 
-    assert_equal "rec1", brew["Tea"].id
+    assert_equal "rec1", brew.tea.id
   end
 
   def test_build_association_and_post_id
@@ -51,7 +54,7 @@ class AssociationsTest < MiniTest::Test
     brew.create
 
     stub_find_request(tea, table: Tea, id: "rec1")
-    assert_equal tea.id, brew["Tea"].id
+    assert_equal tea.id, brew.tea.id
   end
 
   def test_build_association_from_strings
@@ -60,7 +63,7 @@ class AssociationsTest < MiniTest::Test
 
     tea.create
 
-    stub_find_request(Brew.new({}), table: Brew, id: "rec2")
-    assert_equal 1, tea["Brews"].count
+    stub_request([{ id: "rec2" }], table: Brew)
+    assert_equal 1, tea.brews.count
   end
 end

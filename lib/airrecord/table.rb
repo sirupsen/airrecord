@@ -25,21 +25,24 @@ module Airrecord
       def deprecate_symbols
         warn Kernel.caller.first + ": warning: Using symbols with airrecord is deprecated."
       end
-      
+
       def client
         @@clients ||= {}
         @@clients[api_key] ||= Client.new(api_key)
       end
 
-      def has_many(name, options)
-        @associations ||= []
-        @associations << {
-          field: name.to_sym, # todo: deprecate_symbols
-        }.merge(options)
+      def has_many(method_name, options)
+        define_method(method_name.to_sym) do
+          # Get association ids in reverse order, because Airtable’s UI and API
+          # sort associations in opposite directions. We want to match the UI.
+          ids = (self[options.fetch(:column)] || []).reverse
+          table = Kernel.const_get(options.fetch(:class))
+          options[:single] ? table.find(ids.first) : table.find_many(ids)
+        end
       end
 
-      def belongs_to(name, options)
-        has_many(name, options.merge(single: true))
+      def belongs_to(method_name, options)
+        has_many(method_name, options.merge(single: true))
       end
 
       def api_key
@@ -134,17 +137,7 @@ module Airrecord
         value = fields[column_mappings[key]]
       end
 
-      if association = self.association(key)
-        klass = Kernel.const_get(association[:class])
-        associations = value.map { |id_or_obj|
-          id_or_obj = id_or_obj.respond_to?(:id) ? id_or_obj.id : id_or_obj
-          klass.find(id_or_obj)
-        }
-        return associations.first if association[:single]
-        associations
-      else
-        type_cast(value)
-      end
+      type_cast(value)
     end
 
     def []=(key, value)
@@ -228,10 +221,14 @@ module Airrecord
         end
         }]
     end
-    
+
     def ==(other)
       self.class == other.class &&
         serializable_fields == other.serializable_fields
+    end
+
+    def to_s
+      id
     end
 
     protected
@@ -274,7 +271,6 @@ module Airrecord
         value
       end
     end
-
   end
 
   def self.table(api_key, base_key, table_name)
