@@ -32,12 +32,18 @@ module Airrecord
       end
 
       def has_many(method_name, options)
+        # define an assocation getter
         define_method(method_name.to_sym) do
           # Get association ids in reverse order, because Airtable’s UI and API
           # sort associations in opposite directions. We want to match the UI.
           ids = (self[options.fetch(:column)] || []).reverse
           table = Kernel.const_get(options.fetch(:class))
           options[:single] ? table.find(ids.first) : table.find_many(ids)
+        end
+
+        # define an assocation setter
+        define_method("#{method_name}=".to_sym) do |value|
+          self[options.fetch(:column)] = cast_association(value)
         end
       end
 
@@ -208,18 +214,8 @@ module Airrecord
       end
     end
 
-    def serializable_fields(fields = self.fields)
-      Hash[fields.map { |(key, value)|
-        if association(key)
-          value = [ value ] unless value.is_a?(Enumerable)
-          assocs = value.map { |assoc|
-            assoc.respond_to?(:id) ? assoc.id : assoc
-          }               
-          [key, assocs]
-        else
-          [key, value]
-        end
-        }]
+    def serializable_fields
+      fields
     end
 
     def ==(other)
@@ -227,19 +223,7 @@ module Airrecord
         serializable_fields == other.serializable_fields
     end
 
-    def to_s
-      id
-    end
-
     protected
-
-    def association(key)
-      if self.class.associations
-        self.class.associations.find { |association|
-          association[:column].to_s == column_mappings[key].to_s || association[:column].to_s == key.to_s
-        }
-      end
-    end
 
     def fields=(fields)
       @updated_keys = []
@@ -265,11 +249,13 @@ module Airrecord
     end
 
     def type_cast(value)
-      if value =~ /\d{4}-\d{2}-\d{2}/
-        Time.parse(value + " UTC")
-      else
-        value
-      end
+      return Time.parse(value + " UTC") if value =~ /\d{4}-\d{2}-\d{2}/
+      value
+    end
+
+    def cast_association(value)
+      return value.map { |obj| obj&.id || obj } if value.respond_to?(:map)
+      [value&.id || value]
     end
   end
 

@@ -46,9 +46,20 @@ class AssociationsTest < MiniTest::Test
     assert_equal "rec1", brew.tea.id
   end
 
-  def test_build_association_and_post_id
+  def test_build_association_from_strings
+    tea = Tea.new({"Name" => "Jingning", "Brews" => ["rec2", "rec1"]})
+    stub_post_request(tea, table: Tea)
+
+    tea.create
+
+    stub_request([{ id: "rec2" }, { id: "rec1" }], table: Brew)
+    assert_equal 2, tea.brews.count
+  end
+
+  def test_build_belongs_to_association_from_setter
     tea = Tea.new({"Name" => "Jingning", "Brews" => []}, id: "rec1")
-    brew = Brew.new("Name" => "greeaat", "Tea" => [tea])
+    brew = Brew.new("Name" => "greeaat")
+    brew.tea = tea
     stub_post_request(brew, table: Brew)
 
     brew.create
@@ -57,13 +68,17 @@ class AssociationsTest < MiniTest::Test
     assert_equal tea.id, brew.tea.id
   end
 
-  def test_build_association_from_strings
-    tea = Tea.new({"Name" => "Jingning", "Brews" => ["rec2"]})
-    stub_post_request(tea, table: Tea)
+  def test_build_has_many_association_from_setter
+    tea = Tea.new("Name" => "Earl Grey")
+    brew = Brew.new("Name" => "Hot")
+    stub_post_request(brew, table: Brew)
+    stubbed_brew_fields = brew.create.merge("id" => brew.id)
 
-    tea.create
+    tea.brews = [brew]
 
-    stub_request([{ id: "rec2" }], table: Brew)
-    assert_equal 1, tea.brews.count
+    stub_request([stubbed_brew_fields], table: Brew)
+    assert_equal 1, tea.brews.size
+    assert_kind_of Airrecord::Table, tea.brews.first
+    assert_equal tea.brews.first.id, brew.id
   end
 end
