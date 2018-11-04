@@ -41,7 +41,7 @@ module Airrecord
         end
 
         define_method("#{method_name}=".to_sym) do |value|
-          self[options.fetch(:column)] = cast_association(value)
+          self[options.fetch(:column)] = Array(value).map(&:id)
         end
       end
 
@@ -251,10 +251,6 @@ module Airrecord
     def type_cast(value)
       return Time.parse(value + " UTC") if value =~ /\d{4}-\d{2}-\d{2}/
       value
-    end
-
-    def cast_association(value)
-      Array(value).map { |obj| obj&.id || obj }
     end
   end
 
