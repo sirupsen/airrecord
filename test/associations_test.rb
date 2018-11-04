@@ -48,6 +48,12 @@ class AssociationsTest < MiniTest::Test
     assert_equal "rec1", tea.brews.first.id
   end
 
+  def test_has_many_handles_empty_associations
+    tea = Tea.new("Name" => "Gunpowder")
+    stub_request([], table: Brew)
+    assert_equal 0, tea.brews.size
+  end
+
   def test_belongs_to
     brew = Brew.new("Name" => "Good Brew", "Tea" => ["rec1"])
     tea = Tea.new("Name" => "Dong Ding", "Brews" => ["rec2"])
