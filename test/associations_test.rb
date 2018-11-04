@@ -6,6 +6,7 @@ class Tea < Airrecord::Table
   self.table_name = "Teas"
 
   has_many :brews, class: "Brew", column: "Brews"
+  has_one :pot, class: "Teapot", column: "Teapot"
 end
 
 class Brew < Airrecord::Table
@@ -15,6 +16,15 @@ class Brew < Airrecord::Table
 
   belongs_to :tea, class: "Tea", column: "Tea"
 end
+
+class Teapot < Airrecord::Table
+  self.api_key = "key1"
+  self.base_key = "app1"
+  self.table_name = "Teapots"
+
+  belongs_to :tea, class: "Tea", column: "Tea"
+end
+
 
 class AssociationsTest < MiniTest::Test
   def setup
@@ -44,6 +54,14 @@ class AssociationsTest < MiniTest::Test
     stub_find_request(tea, table: Tea, id: "rec1")
 
     assert_equal "rec1", brew.tea.id
+  end
+
+  def test_has_one
+    tea = Tea.new("id" => "rec1", "Name" => "Sencha", "Teapot" => ["rec3"])
+    pot = Teapot.new("Name" => "Cast Iron", "Tea" => ["rec1"])
+    stub_find_request(pot, table: Teapot, id: "rec3")
+
+    assert_equal "rec3", tea.pot.id
   end
 
   def test_build_association_from_strings

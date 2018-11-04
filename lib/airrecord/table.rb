@@ -32,7 +32,6 @@ module Airrecord
       end
 
       def has_many(method_name, options)
-        # define an assocation getter
         define_method(method_name.to_sym) do
           # Get association ids in reverse order, because Airtable’s UI and API
           # sort associations in opposite directions. We want to match the UI.
@@ -41,7 +40,6 @@ module Airrecord
           options[:single] ? table.find(ids.first) : table.find_many(ids)
         end
 
-        # define an assocation setter
         define_method("#{method_name}=".to_sym) do |value|
           self[options.fetch(:column)] = cast_association(value)
         end
@@ -50,6 +48,8 @@ module Airrecord
       def belongs_to(method_name, options)
         has_many(method_name, options.merge(single: true))
       end
+
+      alias has_one belongs_to
 
       def api_key
         @api_key || Airrecord.api_key
@@ -254,8 +254,7 @@ module Airrecord
     end
 
     def cast_association(value)
-      return value.map { |obj| obj&.id || obj } if value.respond_to?(:map)
-      [value&.id || value]
+      Array(value).map { |obj| obj&.id || obj }
     end
   end
 
