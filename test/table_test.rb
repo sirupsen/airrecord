@@ -304,7 +304,7 @@ class TableTest < Minitest::Test
   end
 
   def test_association_accepts_non_enumerable
-    walrus = Walrus.new("Name" => "Wally")    
+    walrus = Walrus.new("Name" => "Wally")
     foot = Foot.new("Name" => "FrontRight", "walrus" => walrus)
 
     foot.serializable_fields
@@ -314,5 +314,33 @@ class TableTest < Minitest::Test
     walrus = Walrus.new("Name" => "Wally")
     walrus["Name"] = "Wally"
     assert walrus.updated_keys.empty?
+  end
+
+  def test_equivalent_records_are_eql?
+    walrus1 = Walrus.new("Name" => "Wally")
+    walrus2 = Walrus.new("Name" => "Wally")
+
+    assert walrus1.eql? walrus2
+  end
+
+  def test_non_equivalent_records_fail_eql?
+    walrus1 = Walrus.new("Name" => "Wally")
+    walrus2 = Walrus.new("Name" => "Wally2")
+
+    assert !walrus1.eql?(walrus2)
+  end
+
+  def test_equivalent_hash_equality
+    walrus1 = Walrus.new("Name" => "Wally")
+    walrus2 = Walrus.new("Name" => "Wally")
+
+    assert_equal walrus1.hash, walrus2.hash
+  end
+
+  def test_non_equivalent_hash_inequality
+    walrus1 = Walrus.new("Name" => "Wally")
+    walrus2 = Walrus.new("Name" => "Wally2")
+
+    assert walrus1.hash != walrus2.hash
   end
 end
