@@ -223,6 +223,12 @@ module Airrecord
         serializable_fields == other.serializable_fields
     end
 
+    alias_method :eql?, :==
+
+    def hash
+      serializable_fields.hash
+    end
+
     protected
 
     def fields=(fields)
