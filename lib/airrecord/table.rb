@@ -25,22 +25,31 @@ module Airrecord
       def deprecate_symbols
         warn Kernel.caller.first + ": warning: Using symbols with airrecord is deprecated."
       end
-      
+
       def client
         @@clients ||= {}
         @@clients[api_key] ||= Client.new(api_key)
       end
 
-      def has_many(name, options)
-        @associations ||= []
-        @associations << {
-          field: name.to_sym, # todo: deprecate_symbols
-        }.merge(options)
+      def has_many(method_name, options)
+        define_method(method_name.to_sym) do
+          # Get association ids in reverse order, because Airtable’s UI and API
+          # sort associations in opposite directions. We want to match the UI.
+          ids = (self[options.fetch(:column)] || []).reverse
+          table = Kernel.const_get(options.fetch(:class))
+          options[:single] ? table.find(ids.first) : table.find_many(ids)
+        end
+
+        define_method("#{method_name}=".to_sym) do |value|
+          self[options.fetch(:column)] = Array(value).map(&:id).reverse
+        end
       end
 
-      def belongs_to(name, options)
-        has_many(name, options.merge(single: true))
+      def belongs_to(method_name, options)
+        has_many(method_name, options.merge(single: true))
       end
+
+      alias has_one belongs_to
 
       def api_key
         @api_key || Airrecord.api_key
@@ -55,6 +64,12 @@ module Airrecord
         else
           client.handle_error(response.status, parsed_response)
         end
+      end
+
+      def find_many(ids)
+        or_args = ids.map { |id| "RECORD_ID() = '#{id}'"}.join(',')
+        formula = "OR(#{or_args})"
+        records(filter: formula).sort_by { |record| or_args.index(record.id) }
       end
 
       def records(filter: nil, sort: nil, view: nil, offset: nil, paginate: true, fields: nil, max_records: nil, page_size: nil)
@@ -128,17 +143,7 @@ module Airrecord
         value = fields[column_mappings[key]]
       end
 
-      if association = self.association(key)
-        klass = Kernel.const_get(association[:class])
-        associations = value.map { |id_or_obj|
-          id_or_obj = id_or_obj.respond_to?(:id) ? id_or_obj.id : id_or_obj
-          klass.find(id_or_obj)
-        }
-        return associations.first if association[:single]
-        associations
-      else
-        type_cast(value)
-      end
+      type_cast(value)
     end
 
     def []=(key, value)
@@ -209,18 +214,8 @@ module Airrecord
       end
     end
 
-    def serializable_fields(fields = self.fields)
-      Hash[fields.map { |(key, value)|
-        if association(key)
-          value = [ value ] unless value.is_a?(Enumerable)
-          assocs = value.map { |assoc|
-            assoc.respond_to?(:id) ? assoc.id : assoc
-          }
-          [key, assocs]
-        else
-          [key, value]
-        end
-        }]
+    def serializable_fields
+      fields
     end
 
     def ==(other)
@@ -235,14 +230,6 @@ module Airrecord
     end
 
     protected
-
-    def association(key)
-      if self.class.associations
-        self.class.associations.find { |association|
-          association[:column].to_s == column_mappings[key].to_s || association[:column].to_s == key.to_s
-        }
-      end
-    end
 
     def fields=(fields)
       @updated_keys = []
@@ -268,13 +255,9 @@ module Airrecord
     end
 
     def type_cast(value)
-      if value =~ /\d{4}-\d{2}-\d{2}/
-        Time.parse(value + " UTC")
-      else
-        value
-      end
+      return Time.parse(value + " UTC") if value =~ /\d{4}-\d{2}-\d{2}/
+      value
     end
-
   end
 
   def self.table(api_key, base_key, table_name)

@@ -249,6 +249,11 @@ class TableTest < Minitest::Test
     end
   end
 
+  def test_find_many
+    ids = %w[rec1 rec2 rec3]
+    assert_instance_of Array, @table.find_many(ids)
+  end
+
   def test_destroy_new_record_fails
     record = @table.new("Name" => "walrus")
 

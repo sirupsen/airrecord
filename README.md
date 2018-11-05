@@ -20,7 +20,7 @@ class Tea < Airrecord::Table
   self.base_key = "app1"
   self.table_name = "Teas"
 
-  has_many "Brews", class: 'Brew', column: "Brews"
+  has_many :brews, class: "Brew", column: "Brews"
 
   def self.chinese
     all(filter: '{Country} = "China"')
@@ -43,7 +43,7 @@ class Brew < Airrecord::Table
   self.base_key = "app1"
   self.table_name = "Brews"
 
-  belongs_to "Tea", class: 'Tea', column: 'Tea'
+  belongs_to :tea, class: "Tea", column: "Tea"
 
   def self.hot
     all(filter: "{Temperature} > 90")
@@ -58,7 +58,7 @@ teas = Tea.all
 tea = teas.first
 tea["Country"] # access atribute
 tea.location # instance methods
-tea["Brews"] # associated brews
+tea.brews # associated brews
 ```
 
 A short-hand API for definitions and more ad-hoc querying is also available:
@@ -115,10 +115,17 @@ end
 This gives us a class that maps to records in a table. Class methods are
 available to fetch records on the table.
 
+### Reading a Single Record
+
+Retrieve a single record via `#find`:
+```ruby
+tea = Tea.find("someid")
+```
+
 ### Listing Records
 
-Retrieval of multiple records is done through `#all`. To get all records in a
-table:
+Retrieval of multiple records is usually done through `#all`. To get all records
+in a table:
 
 ```ruby
 Tea.all # array of Tea instances
@@ -181,6 +188,14 @@ Tea.all(paginate: false)
 
 # Give me only the most recent teas
 Tea.all(sort: { "Created At" => "desc" }, paginate: false)
+```
+
+When you know the IDs of the records you want, and you want them in an ad-hoc
+order, use `#find_many` instead of `#all`:
+
+```ruby
+teas = Tea.find_many(["someid", "anotherid", "yetanotherid"])
+#=> [<Tea @id="someid">,<Tea @id="anotherid">, <Tea @id="yetanotherid">]
 ```
 
 ### Creating
@@ -268,14 +283,22 @@ class Tea < Airrecord::Table
   self.base_key = "app1"
   self.table_name = "Teas"
 
-  has_many "Brews", class: 'Brew', column: "Brews"
+  has_many :brews, class: "Brew", column: "Brews"
+  has_one :teapot, class: "Teapot", column: "Teapot"
 end
 
 class Brew < Airrecord::Table
   self.base_key = "app1"
   self.table_name = "Brews"
 
-  belongs_to "Tea", class: 'Tea', column: 'Tea'
+  belongs_to :tea, class: "Tea", column: "Tea"
+end
+
+class Teapot < Airrecord::Table
+  self.base_key = "app1"
+  self.table_name = "Teapot"
+
+  belongs_to :tea, class: "Tea", column: "Tea"
 end
 ```
 
@@ -289,15 +312,23 @@ _not_ support associations across Bases.
 To retrieve records from associations to a record:
 
 ```ruby
-tea = Tea.find('rec84')
-tea["Brews"] # brews associated with tea
+tea = Tea.find("rec123")
+
+# record.association returns Airrecord instances
+tea.brews #=> [<Brew @id="rec456">, <Brew @id="rec789">]
+tea.teapot #=> <Teapot @id="rec012">
+
+# record["Associated Column"] returns the raw Airtable field, an array of IDs
+tea["Brews"] #=> ["rec789", "rec456"]
+tea["Teapot"] #=> ["rec012"]
 ```
 
 This in turn works the other way too:
 
 ```ruby
-brew = Brew.find('rec849')
-brew["Tea"] # the associated tea instance
+brew = Brew.find("rec456")
+brew.tea #=> <Tea @id="rec123"> the associated tea instance
+brew["Tea"] #=> the raw Airtable field, a single-item array ["rec123"]
 ```
 
 ### Creating associated records
@@ -305,9 +336,18 @@ brew["Tea"] # the associated tea instance
 You can easily associate records with each other:
 
 ```ruby
-tea = Tea.find('rec849829')
+tea = Tea.find("rec123")
 # This will create a brew associated with the specific tea
-brew = Brew.new("Tea" => tea, "Temperature" => "80", "Time" => "4m", "Rating" => "5")
+brew = Brew.new("Temperature" => "80", "Time" => "4m", "Rating" => "5")
+brew.tea = tea
+brew.create
+```
+
+Alternatively, you can specify association ids directly:
+
+```ruby
+tea = Tea.find("rec123")
+brew = Brew.new("Tea" => [tea.id], "Temperature" => "80", "Time" => "4m", "Rating" => "5")
 brew.create
 ```
 
