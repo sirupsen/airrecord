@@ -20,7 +20,7 @@ class Tea < Airrecord::Table
   self.base_key = "app1"
   self.table_name = "Teas"
 
-  has_many :brews, class: 'Brew', column: "Brews"
+  has_many "Brews", class: 'Brew', column: "Brews"
 
   def self.chinese
     all(filter: '{Country} = "China"')
@@ -31,11 +31,11 @@ class Tea < Airrecord::Table
   end
 
   def location
-    [self[:village], self[:country], self[:region]].compact.join(", ")
+    [self["Village"], self["Country"], self["Region"]].compact.join(", ")
   end
 
   def green?
-    self[:type] == "Green"
+    self["Type"] == "Green"
   end
 end
 
@@ -43,22 +43,22 @@ class Brew < Airrecord::Table
   self.base_key = "app1"
   self.table_name = "Brews"
 
-  belongs_to :tea, class: 'Tea', column: 'Tea'
+  belongs_to "Tea", class: 'Tea', column: 'Tea'
 
   def self.hot
     all(filter: "{Temperature} > 90")
   end
 
   def done_brewing?
-    self[:created_at] + self[:duration] > Time.now
+    self["Created At"] + self["Duration"] > Time.now
   end
 end
 
 teas = Tea.all
 tea = teas.first
-tea[:country] # access atribute
+tea["Country"] # access atribute
 tea.location # instance methods
-tea[:brews] # associated brews
+tea["Brews"] # associated brews
 ```
 
 A short-hand API for definitions and more ad-hoc querying is also available:
@@ -67,7 +67,7 @@ A short-hand API for definitions and more ad-hoc querying is also available:
 Tea = Airrecord.table("api_key", "app_key", "Teas")
 
 Tea.all.each do |record|
-  puts "#{record.id}: #{record[:name]}"
+  puts "#{record.id}: #{record["Name"]}"
 end
 
 Tea.find("rec3838")
@@ -107,7 +107,7 @@ class Tea < Airrecord::Table
   self.table_name = "Teas"
 
   def location
-    [self[:village], self[:country], self[:region]].compact.join(", ")
+    [self["Village"], self["Country"], self["Region"]].compact.join(", ")
   end
 end
 ```
@@ -158,17 +158,16 @@ The `sort` option can be used to sort results returned from the Airtable API.
 
 ```ruby
 # Sort teas by the Name column in ascending order
-Tea.all(sort: { Name: "asc" })
+Tea.all(sort: { "Name" => "asc" })
 
 # Sort teas by Type (green, black, oolong, ..) in descending order
-Tea.all(sort: { Type: "desc" })
+Tea.all(sort: { "Type" => "desc" })
 
 # Sort teas by price in descending order
-Tea.all(sort: { Price: "desc" })
+Tea.all(sort: { "Price" => "desc" })
 ```
 
-Note again that the key _must_ be the full column name. Snake-cased variants do
-not work here.
+Note again that the key _must_ be the full column name.
 
 As mentioned above, by default Airrecord will return results from all pages.
 This can be slow if you have 1000s of records. You may wish to use the `view`
@@ -181,7 +180,7 @@ calls. Airrecord will _always_ fetch the maximum possible amount of records
 Tea.all(paginate: false)
 
 # Give me only the most recent teas
-Tea.all(sort: { "Created At": "desc" }, paginate: false)
+Tea.all(sort: { "Created At" => "desc" }, paginate: false)
 ```
 
 ### Creating
@@ -192,16 +191,15 @@ Creating a new record is done through `#create`.
 tea = Tea.new("Name" => "Feng Gang", "Type" => "Green", "Country" => "China")
 tea.create # creates the record
 tea.id # id of the new record
-tea[:name] # "Feng Gang", accessed through snake-cased name
+tea["Name"] # "Feng Gang"
 ```
 
-Note that when instantiating the new record the column names (keys of the passed
-named parameters) need to match the exact column names in Airtable, otherwise
-Airrecord will throw an error that no column matches it.
+Note that column names need to match the exact column names in Airtable,
+otherwise Airrecord will throw an error that no column matches it.
 
-In the future I hope to provide more convient names for these (snake-cased),
-however, this is error-prone without a proper schema API from Airtable which has
-still not been released.
+_Earlier versions of airrecord provided methods for snake-cased column names
+and symbols, however this proved error-prone without a proper schema API from
+Airtable which has still not been released._
 
 ### Updating
 
@@ -210,11 +208,7 @@ Airtable with `#save`.
 
 ```ruby
 tea = Tea.find("someid")
-tea[:name] = "Feng Gang Organic"
-
-# Since the Village column is not set, we do not have access to a snake-cased
-# variant since the mapping is not determined. For all we know, the correct column
-# name could be "VilLlaGe". Therefore, we must use the proper column name.
+tea["Name"] = "Feng Gang Organic"
 tea["Village"] = "Feng Gang"
 
 tea.save # persist to Airtable
@@ -236,7 +230,7 @@ providing the URL. Unfortunately, it does not allow uploading directly.
 
 ```ruby
 word = World.find("cantankerous")
-word["Pronounciation"] = [{url: "https://s3.ca-central-1.amazonaws.com/word-pronunciations/cantankerous.mp3}]
+word["Pronounciation"] = [{url: "https://s3.ca-central-1.amazonaws.com/word-pronunciations/cantankerous.mp3"}]
 word.save
 ```
 
@@ -274,14 +268,14 @@ class Tea < Airrecord::Table
   self.base_key = "app1"
   self.table_name = "Teas"
 
-  has_many :brews, class: 'Brew', column: "Brews"
+  has_many "Brews", class: 'Brew', column: "Brews"
 end
 
 class Brew < Airrecord::Table
   self.base_key = "app1"
   self.table_name = "Brews"
 
-  belongs_to :tea, class: 'Tea', column: 'Tea'
+  belongs_to "Tea", class: 'Tea', column: 'Tea'
 end
 ```
 
@@ -296,14 +290,14 @@ To retrieve records from associations to a record:
 
 ```ruby
 tea = Tea.find('rec84')
-tea[:brews] # brews associated with tea
+tea["Brews"] # brews associated with tea
 ```
 
 This in turn works the other way too:
 
 ```ruby
 brew = Brew.find('rec849')
-brew[:tea] # the associated tea instance
+brew["Tea"] # the associated tea instance
 ```
 
 ### Creating associated records
@@ -328,19 +322,11 @@ around.
 Tea = Airrecord.table("api_key", "app_key", "Teas")
 
 Tea.all.each do |record|
-  puts "#{record.id}: #{record[:name]}"
+  puts "#{record.id}: #{record["Name"]}"
 end
 
 Tea.find("rec3838")
 ```
-
-### Snake-cased helper methods
-
-When retrieving an existing record from Airtable, snake-cased helper names are
-available to index attributes. These are _only_ available on retrieved records,
-and _only_ if the column was set. If it's `nil`, it will not exist. That means
-if you want to set column that has a `nil` value for a column type, you'll have
-to fully type it out.
 
 ### Production Middlewares
 
