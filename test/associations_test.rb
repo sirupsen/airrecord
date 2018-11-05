@@ -94,15 +94,20 @@ class AssociationsTest < MiniTest::Test
 
   def test_build_has_many_association_from_setter
     tea = Tea.new("Name" => "Earl Grey")
-    brew = Brew.new("Name" => "Hot")
-    stub_post_request(brew, table: Brew)
-    stubbed_brew_fields = brew.create.merge("id" => brew.id)
+    brews = %w[Perfect Meh].each_with_object([]) do |name, memo|
+      brew = Brew.new("Name" => name)
+      stub_post_request(brew, table: Brew)
+      brew.create
+      memo << brew
+    end
 
-    tea.brews = [brew]
+    tea.brews = brews
 
-    stub_request([stubbed_brew_fields], table: Brew)
-    assert_equal 1, tea.brews.size
+    brew_fields = brews.map { |brew| brew.fields.merge("id" => brew.id) }
+    stub_request(brew_fields, table: Brew)
+
+    assert_equal 2, tea.brews.size
     assert_kind_of Airrecord::Table, tea.brews.first
-    assert_equal tea.brews.first.id, brew.id
+    assert_equal tea.brews.first.id, brews.first.id
   end
 end

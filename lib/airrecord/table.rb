@@ -41,7 +41,7 @@ module Airrecord
         end
 
         define_method("#{method_name}=".to_sym) do |value|
-          self[options.fetch(:column)] = Array(value).map(&:id)
+          self[options.fetch(:column)] = Array(value).map(&:id).reverse
         end
       end
 
