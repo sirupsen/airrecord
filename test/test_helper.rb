@@ -1,7 +1,7 @@
 $LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
 require 'airrecord'
 require 'byebug'
-
+require 'securerandom'
 require 'minitest/autorun'
 
 class Minitest::Test
@@ -51,7 +51,7 @@ class Minitest::Test
     body = {
       records: records.map { |record|
         {
-          id: SecureRandom.hex(16),
+          id: record["id"] || SecureRandom.hex(16),
           fields: record,
           createdTime: Time.now,
         }
