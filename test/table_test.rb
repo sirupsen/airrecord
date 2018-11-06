@@ -309,8 +309,8 @@ class TableTest < Minitest::Test
   end
 
   def test_association_accepts_non_enumerable
-    walrus = Walrus.new("Name": "Wally")
-    foot = Foot.new("Name": "FrontRight", "walrus": walrus)
+    walrus = Walrus.new("Name" => "Wally")
+    foot = Foot.new("Name" => "FrontRight", "walrus" => walrus)
 
     foot.serializable_fields
   end
