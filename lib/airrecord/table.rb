@@ -77,9 +77,9 @@ module Airrecord
         options[:filterByFormula] = filter if filter
 
         if sort
-          options[:sort] = sort.map { |field, direction|
+          sort.each { |field, direction|
             deprecate_symbols if field.is_a? Symbol
-            { field: field.to_s, direction: direction }
+            options["sort"] = [{ field: field.to_s, direction: direction }]
           }
         end
 
