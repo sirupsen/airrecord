@@ -77,7 +77,7 @@ class Minitest::Test
     end
   end
 
-  def stub_error_request(type: type, message: message, status: 401, headers: {}, table: @table)
+  def stub_error_request(type:, message:, status: 401, headers: {}, table: @table)
     body = {
       error: {
         type: type,
