@@ -1,43 +1,37 @@
 module Airrecord
-  # The Airtable API expects arrays to be URL-encoded with indices.
-  # Faraday doesn't encode arrays this way, but node's "qs" module does:
-  # https://github.com/ljharb/qs#stringifying
+  # Airtable expects that arrays in query strings be encoded with indices.
+  # Faraday follows Rack conventions and encodes arrays _without_ indices.
   #
-  # Airrecord::QueryString makes the qs format available to Faraday
+  # Airrecord::QueryString is a Faraday-compliant params_encoder that follows
+  # the Airtable spec.
   module QueryString
-    module_function
-
-    def encode(params)
+    def self.encode(params)
       params.map { |key, val| Encodings[val].call(key, val) }.join('&')
     end
 
-    def decode(query)
+    def self.decode(query)
       Faraday::NestedParamsEncoder.decode(query)
     end
 
     module Encodings
-      module_function
-
-      def [](value)
-        encoding = "encode_#{value.class}".downcase.to_sym
-        respond_to?(encoding) ? method(encoding) : encode_default
+      def self.[](value)
+        TYPES.fetch(value.class, DEFAULT)
       end
 
-      def encode_default
-        ->(key, value) { "#{key}=#{value}" }
-      end
+      TYPES = {
+        Array => lambda { |prefix, array|
+          array.each_with_index.map do |value, index|
+            self[value].call("#{prefix}[#{index}]", value)
+          end
+        },
+        Hash => lambda { |prefix, hash|
+          hash.map do |key, value|
+            self[value].call("#{prefix}[#{key}]", value)
+          end
+        },
+      }.freeze
 
-      def encode_array(prefix, array)
-        array.each_with_index.map do |value, index|
-          Encodings[value].call("#{prefix}[#{index}]", value)
-        end
-      end
-
-      def encode_hash(prefix, hash)
-        hash.map do |key, value|
-          Encodings[value].call("#{prefix}[#{key}]", value)
-        end
-      end
+      DEFAULT = ->(key, value) { "#{key}=#{value}" }.freeze
     end
   end
 end
