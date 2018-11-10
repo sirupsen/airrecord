@@ -1,4 +1,5 @@
 require 'uri'
+require_relative 'query_string'
 
 module Airrecord
   class Client
@@ -10,10 +11,14 @@ module Airrecord
     end
 
     def connection
-      @connection ||= Faraday.new(url: "https://api.airtable.com", headers: {
-        "Authorization" => "Bearer #{api_key}",
-        "X-API-VERSION" => "0.1.0",
-      }) { |conn|
+      @connection ||= Faraday.new(
+        url: "https://api.airtable.com",
+        headers: {
+          "Authorization" => "Bearer #{api_key}",
+          "X-API-VERSION" => "0.1.0",
+        },
+        request: { params_encoder: Airrecord::QueryString },
+      ) { |conn|
         conn.adapter :net_http_persistent
       }
     end
