@@ -20,6 +20,7 @@ module Airrecord
         url: "https://api.airtable.com",
         headers: {
           "Authorization" => "Bearer #{api_key}",
+          "User-Agent"    => "Airrecord/#{Airrecord::VERSION}",
           "X-API-VERSION" => "0.1.0",
         },
         request: { params_encoder: Airrecord::QueryString },
@@ -27,7 +28,6 @@ module Airrecord
         if Airrecord.throttle?
           conn.request :airrecord_rate_limiter, requests_per_second: AIRTABLE_RPS_LIMIT
         end
-        conn.adapter :net_http_persistent
       }
     end
 
