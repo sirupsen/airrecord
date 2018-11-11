@@ -21,13 +21,13 @@ module Airrecord
         headers: {
           "Authorization" => "Bearer #{api_key}",
           "X-API-VERSION" => "0.1.0",
+        "User-Agent"    => "Airrecord/#{Airrecord::VERSION}",
         },
         request: { params_encoder: Airrecord::QueryString },
       ) { |conn|
         if Airrecord.throttle?
           conn.request :airrecord_rate_limiter, requests_per_second: AIRTABLE_RPS_LIMIT
         end
-        conn.adapter :net_http_persistent
       }
     end
 

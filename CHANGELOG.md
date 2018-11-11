@@ -7,6 +7,7 @@
     tea["Brews"] #=> ["rec456", "rec789"] returns a raw Airtable field
     ```
 * Fix sorting by multiple fields
+* Report `User-Agent` as `Airrecord`.
 
 # 0.2.5
 
