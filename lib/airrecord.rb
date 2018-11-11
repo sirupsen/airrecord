@@ -9,4 +9,10 @@ module Airrecord
   extend self
   Error = Class.new(StandardError)
   attr_accessor :api_key
+  attr_accessor :throttle
+
+  def throttle?
+    return true if @throttle.nil?
+    @throttle
+  end
 end
