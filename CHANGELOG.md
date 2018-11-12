@@ -6,6 +6,7 @@
     tea.brews #=> [<Brew>, <Brew>] returns associated models
     tea["Brews"] #=> ["rec456", "rec789"] returns a raw Airtable field
     ```
+* Fix sorting by multiple fields
 
 # 0.2.5
 
