@@ -1,4 +1,3 @@
-require 'uri'
 require_relative 'query_string'
 
 module Airrecord
@@ -24,7 +23,7 @@ module Airrecord
     end
 
     def escape(*args)
-      URI.escape(*args)
+      QueryString.escape(*args)
     end
 
     def parse(body)

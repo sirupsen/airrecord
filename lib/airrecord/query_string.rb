@@ -1,3 +1,5 @@
+require 'erb'
+
 module Airrecord
   # Airtable expects that arrays in query strings be encoded with indices.
   # Faraday follows Rack conventions and encodes arrays _without_ indices.
@@ -13,7 +15,13 @@ module Airrecord
       Faraday::NestedParamsEncoder.decode(query)
     end
 
+    def self.escape(*query)
+      query.map { |qs| ERB::Util.url_encode(qs) }.join('')
+    end
+
     module Encodings
+      using QueryString
+
       def self.[](value)
         TYPES.fetch(value.class, DEFAULT)
       end
@@ -31,7 +39,9 @@ module Airrecord
         },
       }.freeze
 
-      DEFAULT = ->(key, value) { "#{key}=#{value}" }.freeze
+      DEFAULT = lambda do |key, value|
+        "#{QueryString.escape(key)}=#{QueryString.escape(value)}"
+      end
     end
   end
 end
