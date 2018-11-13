@@ -6,11 +6,9 @@
     tea.brews #=> [<Brew>, <Brew>] returns associated models
     tea["Brews"] #=> ["rec456", "rec789"] returns a raw Airtable field
     ```
-<<<<<<< HEAD
+* Automatically throttle client calls to Airtable's API limit of 5 requests per second.
 * Fix sorting by multiple fields
-=======
 * Report `User-Agent` as `Airrecord`.
->>>>>>> http: add user agent
 
 # 0.2.5
 
