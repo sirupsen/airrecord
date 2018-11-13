@@ -167,7 +167,7 @@ module Airrecord
       raise Error, "Record already exists (record has an id)" unless new_record?
 
       body = { fields: serializable_fields }.to_json
-      response = client.connection.post("/v0/#{self.class.base_key}/#{client.escape(self.class.table_name)}", body, { 'Content-Type': 'application/json' })
+      response = client.connection.post("/v0/#{self.class.base_key}/#{client.escape(self.class.table_name)}", body, { 'Content-Type' => 'application/json' })
       parsed_response = client.parse(response.body)
 
       if response.success?
@@ -191,7 +191,7 @@ module Airrecord
         }]
       }.to_json
 
-      response = client.connection.patch("/v0/#{self.class.base_key}/#{client.escape(self.class.table_name)}/#{self.id}", body, { 'Content-Type': 'application/json' })
+      response = client.connection.patch("/v0/#{self.class.base_key}/#{client.escape(self.class.table_name)}/#{self.id}", body, { 'Content-Type' => 'application/json' })
       parsed_response = client.parse(response.body)
 
       if response.success?

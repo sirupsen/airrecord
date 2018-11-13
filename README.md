@@ -368,6 +368,15 @@ end
 Tea.find("rec3838")
 ```
 
+### Throttling
+
+Airtable's API enforces a 5 requests per second limit per client. In most cases,
+you won't reach this limit in a single thread but it's possible for some fast
+calls. Airrecord automatically enforces this limit. It doesn't use a naive
+throttling algorithm that does a `sleep(0.2)` between each call, but rather
+keeps a sliding window of when each call was made and will sleep at the end of
+the window if requires. This means that bursting is supported.
+
 ### Production Middlewares
 
 For production use-cases, it's worth considering adding retries and circuit
