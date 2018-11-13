@@ -145,6 +145,18 @@ class TableTest < Minitest::Test
     assert record.save
   end
 
+  def test_change_value_with_symbol_raises_error
+    assert_raises Airrecord::Error do
+      first_record[:Name] = "new_name"
+    end
+  end
+
+  def test_access_value_with_symbol_raises_error
+    assert_raises Airrecord::Error do
+      first_record[:Name]
+    end
+  end
+
   def test_updates_fields_to_newest_values_after_update
     record = first_record
 

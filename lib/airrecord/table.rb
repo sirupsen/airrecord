@@ -109,10 +109,12 @@ module Airrecord
     end
 
     def [](key)
+      validate_key(key)
       fields[key]
     end
 
     def []=(key, value)
+      validate_key(key)
       return if fields[key] == value # no-op
       @updated_keys << key
       fields[key] = value
@@ -198,6 +200,12 @@ module Airrecord
 
     def client
       self.class.client
+    end
+
+    def validate_key(key)
+      return true unless key.is_a?(Symbol)
+      help = "Try record['#{key.to_s.gsub('_', ' ')}'] instead."
+      raise Error, "Airrecord 1.0 dropped support for Symbols as field names. #{help}"
     end
   end
 
