@@ -200,13 +200,22 @@ teas = Tea.find_many(["someid", "anotherid", "yetanotherid"])
 
 ### Creating
 
-Creating a new record is done through `#create`.
+Creating a new record is done through `Table.create`.
 
 ```ruby
-tea = Tea.new("Name" => "Feng Gang", "Type" => "Green", "Country" => "China")
-tea.create # creates the record
+tea = Tea.create("Name" => "Feng Gang", "Type" => "Green", "Country" => "China")
 tea.id # id of the new record
 tea["Name"] # "Feng Gang"
+```
+
+If you need to manipulate a record before saving it, you can use `Table.new`
+instead of `create`, then call `#save` when you're ready.
+
+```ruby
+tea = Tea.new("Type" => "Green", "Country" => "China")
+tea["Name"] = "Feng Gang"
+tea.save
+tea.id
 ```
 
 Note that column names need to match the exact column names in Airtable,

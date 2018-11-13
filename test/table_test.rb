@@ -231,6 +231,26 @@ class TableTest < Minitest::Test
     end
   end
 
+  def test_class_level_create
+    record = @table.new("Name" => "omg")
+
+    stub_post_request(record)
+
+    record = @table.create(record.fields)
+    assert record.id
+  end
+
+  def test_class_level_create_handles_error
+    record = @table.new("Name" => "omg")
+
+    stub_post_request(record, status: 401, return_body: { error: { type: "omg", message: "wow" }})
+
+    assert_raises Airrecord::Error do
+      @table.create record.fields
+    end
+  end
+
+
   def test_find
     record = @table.new("Name" => "walrus")
 
