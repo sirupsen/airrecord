@@ -148,8 +148,8 @@ class TableTest < Minitest::Test
   def test_updates_fields_to_newest_values_after_update
     record = first_record
 
-    record["Name"] = "new_name"
-    stub_patch_request(record, ["Name"], return_body: record.fields.merge("Notes" => "new animal"))
+    record[:name] = "new_name"
+    stub_patch_request(record, ["Name"], return_body: { fields: record.fields.merge("Notes" => "new animal") })
 
     assert record.save
     assert_equal "new_name", record["Name"]
