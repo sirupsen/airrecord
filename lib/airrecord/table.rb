@@ -108,6 +108,10 @@ module Airrecord
       !id
     end
 
+    def [](key)
+      fields[key]
+    end
+
     def []=(key, value)
       return if fields[key] == value # no-op
       @updated_keys << key
