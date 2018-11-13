@@ -181,12 +181,12 @@ class TableTest < Minitest::Test
     assert record.save
   end
 
-  def test_update_raises_if_new_record
+  def test_update_creates_if_new_record
     record = @table.new("Name" => "omg")
 
-    assert_raises Airrecord::Error do
-      record.save
-    end
+    stub_post_request(record)
+
+    assert record.save
   end
 
   def test_existing_record_is_not_new

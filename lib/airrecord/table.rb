@@ -180,7 +180,7 @@ module Airrecord
     end
 
     def save
-      raise Error, "Unable to save a new record" if new_record?
+      return create if new_record?
 
       return true if @updated_keys.empty?
 
