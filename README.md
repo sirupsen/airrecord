@@ -215,7 +215,6 @@ instead of `create`, then call `#save` when you're ready.
 tea = Tea.new("Type" => "Green", "Country" => "China")
 tea["Name"] = "Feng Gang"
 tea.save
-tea.id
 ```
 
 Note that column names need to match the exact column names in Airtable,
