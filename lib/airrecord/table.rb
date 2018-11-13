@@ -143,7 +143,7 @@ module Airrecord
         value = fields[column_mappings[key]]
       end
 
-      type_cast(value)
+      value
     end
 
     def []=(key, value)
@@ -252,11 +252,6 @@ module Airrecord
 
     def client
       self.class.client
-    end
-
-    def type_cast(value)
-      return Time.parse(value + " UTC") if value =~ /\d{4}-\d{2}-\d{2}/
-      value
     end
   end
 

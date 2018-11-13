@@ -9,6 +9,7 @@
 * Automatically throttle client calls to Airtable's API limit of 5 requests per second.
 * Fix sorting by multiple fields
 * Report `User-Agent` as `Airrecord`.
+* Dates that are formed `\d{4}-\d{2}-\d{2}` are no longer auto-parsed. Define a helper instead.
 
 # 0.2.5
 

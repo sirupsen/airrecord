@@ -287,11 +287,11 @@ class TableTest < Minitest::Test
     end
   end
 
-  def test_dates_are_type_casted
+  def test_dates_are_not_type_casted
     stub_request([{"Name" => "omg", "Created" => Time.now.to_s}])
 
     record = first_record
-    assert_instance_of Time, record["Created"]
+    assert_instance_of String, record["Created"]
   end
 
   def test_comparison
