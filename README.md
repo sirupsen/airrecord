@@ -50,7 +50,7 @@ class Brew < Airrecord::Table
   end
 
   def done_brewing?
-    self["Created At"] + self["Duration"] > Time.now
+    Time.parse(self["Created At"]) + self["Duration"] > Time.now
   end
 end
 
