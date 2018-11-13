@@ -72,6 +72,10 @@ module Airrecord
         records(filter: formula).sort_by { |record| or_args.index(record.id) }
       end
 
+      def create(fields)
+        new(fields).tap { |record| record.save }
+      end
+
       def records(filter: nil, sort: nil, view: nil, offset: nil, paginate: true, fields: nil, max_records: nil, page_size: nil)
         options = {}
         options[:filterByFormula] = filter if filter
@@ -180,7 +184,7 @@ module Airrecord
     end
 
     def save
-      raise Error, "Unable to save a new record" if new_record?
+      return create if new_record?
 
       return true if @updated_keys.empty?
 

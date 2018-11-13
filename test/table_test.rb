@@ -181,12 +181,12 @@ class TableTest < Minitest::Test
     assert record.save
   end
 
-  def test_update_raises_if_new_record
+  def test_update_creates_if_new_record
     record = @table.new("Name" => "omg")
 
-    assert_raises Airrecord::Error do
-      record.save
-    end
+    stub_post_request(record)
+
+    assert record.save
   end
 
   def test_existing_record_is_not_new
@@ -230,6 +230,26 @@ class TableTest < Minitest::Test
       record.create
     end
   end
+
+  def test_class_level_create
+    record = @table.new("Name" => "omg")
+
+    stub_post_request(record)
+
+    record = @table.create(record.fields)
+    assert record.id
+  end
+
+  def test_class_level_create_handles_error
+    record = @table.new("Name" => "omg")
+
+    stub_post_request(record, status: 401, return_body: { error: { type: "omg", message: "wow" }})
+
+    assert_raises Airrecord::Error do
+      @table.create record.fields
+    end
+  end
+
 
   def test_find
     record = @table.new("Name" => "walrus")
