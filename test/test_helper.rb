@@ -28,7 +28,7 @@ class Minitest::Test
     end
   end
 
-  def stub_patch_request(record, updated_keys, table: @table1, status: 200, headers: {}, return_body: nil)
+  def stub_patch_request(record, updated_keys, table: @table, status: 200, headers: {}, return_body: nil)
     return_body ||= { fields: record.fields }
     return_body = return_body.to_json
 

@@ -1,30 +1,7 @@
 module Airrecord
-  # TODO: This would be much simplified if we had a schema instead. Hopefully
-  # one day Airtable will add this, but to simplify and crush the majority of
-  # the bugs that hide in here (which would be related to the dynamic schema) we
-  # may just query the first page and infer a schema from there that can be
-  # overridden on the specific classes.
-  #
-  # Right now I bet there's a bunch of bugs around similar named column keys (in
-  # terms of capitalization), it's inconsistent and non-obvious that `create`
-  # doesn't use the same column keys as everything else.
-  #
-  # 2018-11-01
-  # deprecate_symbols: long-term plan is to force everyone to use raw strings,
-  # to match the Airtable behavior. For now we'll just warn when using symbols
-  # with a deprecation notice.
-
   class Table
-    def deprecate_symbols
-      self.class.deprecate_symbols
-    end
-
     class << self
       attr_accessor :base_key, :table_name, :api_key, :associations
-
-      def deprecate_symbols
-        warn Kernel.caller.first + ": warning: Using symbols with airrecord is deprecated."
-      end
 
       def client
         @@clients ||= {}
@@ -82,7 +59,6 @@ module Airrecord
 
         if sort
           options[:sort] = sort.map { |field, direction|
-            deprecate_symbols if field.is_a? Symbol
             { field: field.to_s, direction: direction }
           }
         end
@@ -124,7 +100,7 @@ module Airrecord
       alias_method :all, :records
     end
 
-    attr_reader :fields, :column_mappings, :id, :created_at, :updated_keys
+    attr_reader :fields, :id, :created_at, :updated_keys
 
     def initialize(fields, id: nil, created_at: nil)
       @id = id
@@ -137,34 +113,15 @@ module Airrecord
     end
 
     def [](key)
-      value = nil
-
-      if fields[key]
-        deprecate_symbols if key.is_a? Symbol
-        value = fields[key]
-      elsif column_mappings[key]
-        deprecate_symbols if key.is_a? Symbol
-        value = fields[column_mappings[key]]
-      end
-
-      value
+      validate_key(key)
+      fields[key]
     end
 
     def []=(key, value)
-      deprecate_symbols if key.is_a? Symbol
-      if fields[key]
-        return if fields[key] == value # no-op
-        @updated_keys << key
-        fields[key] = value
-      elsif column_mappings[key]
-        deprecate_symbols
-        return if fields[column_mappings[key]] == value # no-op
-        @updated_keys << column_mappings[key]
-        fields[column_mappings[key]] = value
-      else
-        @updated_keys << key
-        fields[key] = value
-      end
+      validate_key(key)
+      return if fields[key] == value # no-op
+      @updated_keys << key
+      fields[key] = value
     end
 
     def create
@@ -237,16 +194,7 @@ module Airrecord
 
     def fields=(fields)
       @updated_keys = []
-      @column_mappings = Hash[fields.keys.map { |key| [underscore(key), key] }] # TODO remove (deprecate_symbols)
       @fields = fields
-    end
-
-    def self.underscore(key) # TODO remove (deprecate_symbols)
-      key.to_s.strip.gsub(/\W+/, "_").downcase.to_sym
-    end
-
-    def underscore(key) # TODO remove (deprecate_symbols)
-      self.class.underscore(key)
     end
 
     def created_at=(created_at)
@@ -256,6 +204,15 @@ module Airrecord
 
     def client
       self.class.client
+    end
+
+    def validate_key(key)
+      return true unless key.is_a?(Symbol)
+      raise Error, <<~MSG
+        Airrecord 1.0 dropped support for Symbols as field names.
+        Please use the full column name, a String, instead.
+        You might try: record['#{key.to_s.gsub('_', ' ')}']
+      MSG
     end
   end
 
