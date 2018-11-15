@@ -3,7 +3,9 @@
 Airrecord is an alternative Airtable Ruby libary to
 [`airtable-ruby`](https://github.com/airtable/airtable-ruby). Airrecord attempts
 to enforce a more [database-like API to
-Airtable](http://sirupsen.com/minimum-viable-airtable/).
+Airtable](http://sirupsen.com/minimum-viable-airtable/). However, there's also
+an [ad-hoc API available](https://github.com/sirupsen/airrecord#ad-hoc-api) that
+skips the class definitions!
 
 You can add this line to your Gemfile to use Airrecord:
 
