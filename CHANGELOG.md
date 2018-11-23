@@ -1,3 +1,6 @@
+# 1.0.1
+* Support JRuby 9.0 and CRuby 2.2 (#47)
+
 # 1.0.0
 
 * 1.0.0 introduces breaking changes, including removing support for symbols and
