@@ -208,11 +208,11 @@ module Airrecord
 
     def validate_key(key)
       return true unless key.is_a?(Symbol)
-      raise Error, <<~MSG
-        Airrecord 1.0 dropped support for Symbols as field names.
-        Please use the full column name, a String, instead.
-        You might try: record['#{key.to_s.gsub('_', ' ')}']
-      MSG
+      raise(Error, [
+        "Airrecord 1.0 dropped support for Symbols as field names.",
+        "Please use the raw field name, a String, instead.",
+        "You might try: record['#{key.to_s.tr('_', ' ')}']"
+      ].join("\n"))
     end
   end
 
