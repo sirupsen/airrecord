@@ -20,8 +20,6 @@ module Airrecord
     end
 
     module Encodings
-      using QueryString
-
       def self.[](value)
         TYPES.fetch(value.class, DEFAULT)
       end
