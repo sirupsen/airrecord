@@ -1,11 +1,16 @@
 module Airrecord
   class Table
     class << self
-      attr_accessor :base_key, :table_name, :api_key, :associations
+      attr_accessor :base_key, :table_name
+      attr_writer :api_key
 
       def client
         @@clients ||= {}
         @@clients[api_key] ||= Client.new(api_key)
+      end
+
+      def api_key
+        defined?(@api_key) ? @api_key : Airrecord.api_key
       end
 
       def has_many(method_name, options)
@@ -27,10 +32,6 @@ module Airrecord
       end
 
       alias has_one belongs_to
-
-      def api_key
-        @api_key || Airrecord.api_key
-      end
 
       def find(id)
         response = client.connection.get("/v0/#{base_key}/#{client.escape(table_name)}/#{id}")
