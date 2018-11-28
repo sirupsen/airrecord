@@ -1,5 +1,6 @@
 # 1.0.1
 * Support JRuby 9.0 and CRuby 2.2 (#47)
+* Fix $stderr warnings in CRurby > 2.3 (#46)
 
 # 1.0.0
 
