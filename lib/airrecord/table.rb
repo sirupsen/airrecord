@@ -120,7 +120,7 @@ module Airrecord
       body = { fields: serializable_fields }.to_json
       parsed_response = client.request(
         "/v0/#{self.class.base_key}/#{self.class.table_name}",
-        method: 'post',
+        method: :post,
         body: body,
       )
       @id = parsed_response["id"]
