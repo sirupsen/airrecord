@@ -19,7 +19,9 @@ module Airrecord
           # sort associations in opposite directions. We want to match the UI.
           ids = (self[options.fetch(:column)] || []).reverse
           table = Kernel.const_get(options.fetch(:class))
-          options[:single] ? table.find(ids.first) : table.find_many(ids)
+          return table.find_many(ids) unless options[:single]
+
+          (id = ids.first) ? table.find(id) : nil
         end
 
         define_method("#{method_name}=".to_sym) do |value|
