@@ -70,6 +70,12 @@ class AssociationsTest < MiniTest::Test
     assert_equal "rec3", tea.pot.id
   end
 
+  def test_has_one_handles_empty_associations
+    pot = Teapot.new("Name" => "Ceramic")
+
+    assert_nil pot.tea
+  end
+
   def test_build_association_from_strings
     tea = Tea.new({"Name" => "Jingning", "Brews" => ["rec2", "rec1"]})
     stub_post_request(tea, table: Tea)
