@@ -34,14 +34,8 @@ module Airrecord
       alias has_one belongs_to
 
       def find(id)
-        response = client.connection.get("/v0/#{base_key}/#{client.escape(table_name)}/#{id}")
-        parsed_response = client.parse(response.body)
-
-        if response.success?
-          self.new(parsed_response["fields"], id: id)
-        else
-          client.handle_error(response.status, parsed_response)
-        end
+        data = client.request("/v0/#{base_key}/#{table_name}/#{id}")
+        self.new(data["fields"], id: id)
       end
 
       def find_many(ids)
@@ -70,33 +64,26 @@ module Airrecord
         options[:maxRecords] = max_records if max_records
         options[:pageSize] = page_size if page_size
 
-        path = "/v0/#{base_key}/#{client.escape(table_name)}"
-        response = client.connection.get(path, options)
-        parsed_response = client.parse(response.body)
+        path = "/v0/#{base_key}/#{table_name}"
+        parsed_response = client.request(path, params: options)
+        record_list = parsed_response["records"].map { |record|
+          self.new(record["fields"], id: record["id"], created_at: record["createdTime"])
+        }
 
-        if response.success?
-          records = parsed_response["records"]
-          records = records.map { |record|
-            self.new(record["fields"], id: record["id"], created_at: record["createdTime"])
-          }
-
-          if paginate && parsed_response["offset"]
-            records.concat(records(
-              filter: filter,
-              sort: sort,
-              view: view,
-              paginate: paginate,
-              fields: fields,
-              offset: parsed_response["offset"],
-              max_records: max_records,
-              page_size: page_size,
-            ))
-          end
-
-          records
-        else
-          client.handle_error(response.status, parsed_response)
+        if paginate && parsed_response["offset"]
+          record_list.concat(records(
+            filter: filter,
+            sort: sort,
+            view: view,
+            paginate: paginate,
+            fields: fields,
+            offset: parsed_response["offset"],
+            max_records: max_records,
+            page_size: page_size,
+          ))
         end
+
+        record_list
       end
       alias_method :all, :records
     end
@@ -129,16 +116,14 @@ module Airrecord
       raise Error, "Record already exists (record has an id)" unless new_record?
 
       body = { fields: serializable_fields }.to_json
-      response = client.connection.post("/v0/#{self.class.base_key}/#{client.escape(self.class.table_name)}", body, { 'Content-Type' => 'application/json' })
-      parsed_response = client.parse(response.body)
-
-      if response.success?
-        @id = parsed_response["id"]
-        self.created_at = parsed_response["createdTime"]
-        self.fields = parsed_response["fields"]
-      else
-        client.handle_error(response.status, parsed_response)
-      end
+      parsed_response = client.request(
+        "/v0/#{self.class.base_key}/#{self.class.table_name}",
+        method: 'post',
+        body: body,
+      )
+      @id = parsed_response["id"]
+      self.created_at = parsed_response["createdTime"]
+      self.fields = parsed_response["fields"]
     end
 
     def save
@@ -146,34 +131,30 @@ module Airrecord
 
       return true if @updated_keys.empty?
 
-      # To avoid trying to update computed fields we *always* use PATCH
       body = {
         fields: Hash[@updated_keys.map { |key|
           [key, fields[key]]
         }]
       }.to_json
 
-      response = client.connection.patch("/v0/#{self.class.base_key}/#{client.escape(self.class.table_name)}/#{self.id}", body, { 'Content-Type' => 'application/json' })
-      parsed_response = client.parse(response.body)
+      # To avoid trying to update computed fields we *always* use PATCH
+      parsed_response = client.request(
+        "/v0/#{self.class.base_key}/#{self.class.table_name}/#{self.id}",
+        method: :patch,
+        body: body,
+      )
 
-      if response.success?
-        self.fields = parsed_response["fields"]
-      else
-        client.handle_error(response.status, parsed_response)
-      end
+      self.fields = parsed_response["fields"]
     end
 
     def destroy
       raise Error, "Unable to destroy new record" if new_record?
 
-      response = client.connection.delete("/v0/#{self.class.base_key}/#{client.escape(self.class.table_name)}/#{self.id}")
-      parsed_response = client.parse(response.body)
-
-      if response.success?
-        true
-      else
-        client.handle_error(response.status, parsed_response)
-      end
+      client.request(
+        "/v0/#{self.class.base_key}/#{self.class.table_name}/#{self.id}",
+        method: :delete
+      )
+      true
     end
 
     def serializable_fields
