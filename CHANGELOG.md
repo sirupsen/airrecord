@@ -1,4 +1,10 @@
+# 1.0.2 (unreleased)
+
+* When a `has_one` or `belongs_to` association is empty, return `nil` instead of
+  a blank record (#51)
+
 # 1.0.1
+
 * Support JRuby 9.0 and CRuby 2.2 (#47)
 * Fix $stderr warnings in CRurby > 2.3 (#46)
 
