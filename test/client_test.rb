@@ -32,6 +32,7 @@ class ClientTest < Minitest::Test
   def test_successful_get_request_returns_valid_json
     @stubs.get('/valid') { |env| [200, {}, { "hello" => "world" }.to_json] }
     response = @client.request('/valid')
+
     assert_equal(response["hello"], "world")
   end
 

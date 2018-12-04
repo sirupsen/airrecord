@@ -3,6 +3,8 @@
 * When a `has_one` or `belongs_to` association is empty, return `nil` instead of
   a blank record (#51)
 
+* Add tests for Airrecord::Client (#44)
+
 # 1.0.1
 
 * Support JRuby 9.0 and CRuby 2.2 (#47)
