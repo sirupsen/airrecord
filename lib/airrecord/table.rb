@@ -47,6 +47,8 @@ module Airrecord
       end
 
       def find_many(ids)
+        return [] if ids.empty?
+
         or_args = ids.map { |id| "RECORD_ID() = '#{id}'"}.join(',')
         formula = "OR(#{or_args})"
         records(filter: formula).sort_by { |record| or_args.index(record.id) }

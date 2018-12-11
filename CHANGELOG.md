@@ -3,6 +3,9 @@
 * When a `has_one` or `belongs_to` association is empty, return `nil` instead of
   a blank record (#51)
 
+* When a `has_many` association is empty, do not make a network call to the
+  associated table
+
 # 1.0.1
 
 * Support JRuby 9.0 and CRuby 2.2 (#47)
