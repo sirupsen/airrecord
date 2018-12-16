@@ -50,7 +50,7 @@ class AssociationsTest < MiniTest::Test
 
   def test_has_many_handles_empty_associations
     tea = Tea.new("Name" => "Gunpowder")
-    stub_request([], table: Brew)
+    stub_request([{ "id" => "brew1", "Name" => "unrelated"  }], table: Brew)
     assert_equal 0, tea.brews.size
   end
 

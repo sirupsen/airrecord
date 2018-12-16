@@ -286,6 +286,12 @@ class TableTest < Minitest::Test
     assert_instance_of Array, @table.find_many(ids)
   end
 
+  def test_find_many_makes_no_network_call_when_ids_are_empty
+    stub_request([], status: 500)
+
+    assert_equal([], @table.find_many([]))
+  end
+
   def test_destroy_new_record_fails
     record = @table.new("Name" => "walrus")
 
