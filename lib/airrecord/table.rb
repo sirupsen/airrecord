@@ -57,6 +57,19 @@ module Airrecord
         records(filter: formula).sort_by { |record| or_args.index(record.id) }
       end
 
+      def find_by(conditions)
+        where(conditions).first
+      end
+
+      def find_by!(conditions)
+        find_by(conditions) || client.handle_error(404, {
+          "error" => {
+            "type" => "RECORD_NOT_FOUND",
+            "message" => "No record matches those conditions"
+          }
+        })
+      end
+
       def create(fields)
         new(fields).tap { |record| record.save }
       end

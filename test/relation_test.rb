@@ -32,18 +32,18 @@ class RelationTest < MiniTest::Test
   end
 
   def test_order_converts_to_sort_param
-    expected = { sort: { 'Name' => 'Desc' } }
-    actual = @table.order('Name' => 'Desc').to_h
+    expected = { sort: { 'Name' => 'desc' } }
+    actual = @table.order('Name' => 'desc').to_h
 
     assert_equal expected, actual
   end
 
   def test_order_merges_multiple_calls
-    expected = { sort: { 'Name' => 'Desc', 'Rank' => 'Asc' } }
+    expected = { sort: { 'Name' => 'desc', 'Rank' => 'asc' } }
     actual = @table
-      .order('Name' => 'Asc')
-      .order('Name' => 'Desc')
-      .order('Rank' => 'Asc')
+      .order('Name' => 'asc')
+      .order('Name' => 'desc')
+      .order('Rank' => 'asc')
       .to_h
 
     assert_equal expected, actual

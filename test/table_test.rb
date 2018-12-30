@@ -90,7 +90,7 @@ class TableTest < Minitest::Test
 
   def test_chaining_relation_methods_returns_enumerable_relation
     stub_request([ { 'Name' => 'Kirk', 'Rank' => 'Captain' } ])
-    relation = @table.where('Rank' => 'Captain').order('Name' => 'Asc').limit(1)
+    relation = @table.where('Rank' => 'Captain').order('Name' => 'asc').limit(1)
 
     assert relation.class.included_modules.include?(Enumerable)
     assert_equal(['Kirk'], relation.map { |record| record['Name'] })
@@ -298,6 +298,27 @@ class TableTest < Minitest::Test
     stub_request([], status: 500)
 
     assert_equal([], @table.find_many([]))
+  end
+
+  def test_find_by_returns_one_record
+    stub_request([{ 'Name' => 'walrus' }])
+
+    assert_equal 'walrus', @table.find_by('Name' => 'walrus')['Name']
+    assert_equal 'walrus', @table.find_by!('Name' => 'walrus')['Name']
+  end
+
+  def test_find_by_returns_nil_when_no_record_matches
+    stub_request([])
+
+    assert_nil @table.find_by('Name' => 'walrus')
+  end
+
+  def test_find_by_raises_404_when_no_record_matches_and_called_with_bang
+    stub_request([])
+
+    assert_raises Airrecord::Error do
+      @table.find_by!('Name' => 'walrus')
+    end
   end
 
   def test_destroy_new_record_fails
