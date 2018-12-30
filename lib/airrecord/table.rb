@@ -1,3 +1,6 @@
+require 'forwardable'
+require_relative 'relation'
+
 module Airrecord
   class Table
     class << self
@@ -103,6 +106,11 @@ module Airrecord
         end
       end
       alias_method :all, :records
+
+      # Delegate chainable query methods to Airrecord::Relation
+      extend Forwardable
+      def relation() Airrecord::Relation.new(self) end
+      def_delegators :relation, :where, :limit, :order
     end
 
     attr_reader :fields, :id, :created_at, :updated_keys

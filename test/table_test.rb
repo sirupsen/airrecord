@@ -88,6 +88,17 @@ class TableTest < Minitest::Test
     assert_equal 2, records.size
   end
 
+  def test_chaining_relation_methods_returns_enumerable_relation
+    stub_request([ { 'Name' => 'Kirk', 'Rank' => 'Captain' } ])
+    relation = @table
+      .where('Rank' => 'Captain')
+      .order('Name' => 'Asc')
+      .limit(1)
+
+    assert relation.class.included_modules.include?(Enumerable)
+    assert_equal(['Kirk'], relation.map { |record| record['Name'] })
+  end
+
   def test_index_by_normalized_name
     assert_equal "omg", first_record["Name"]
   end
