@@ -25,8 +25,7 @@ module Airrecord
     end
 
     def each(&block)
-      args = RulesToRecordArgs.call(rules)
-      @table.records(args).each(&block)
+      @table.records(record_params).each(&block)
     end
 
     private
@@ -37,7 +36,7 @@ module Airrecord
     end
 
     # Convert rules to a hash that Table#records can parse, omitting falsy keys
-    RulesToRecordArgs = lambda do |rules|
+    def record_params
       wheres, orders, max = rules.values_at(:where, :order, :limit)
       filters = wheres.map { |key, val| "{#{key}} = '#{val}'" }
       [
@@ -46,6 +45,5 @@ module Airrecord
         [:max_records, max]
       ].select { |_, val| val }.to_h
     end
-    private_constant :RulesToRecordArgs
   end
 end

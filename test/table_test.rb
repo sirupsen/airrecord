@@ -90,10 +90,7 @@ class TableTest < Minitest::Test
 
   def test_chaining_relation_methods_returns_enumerable_relation
     stub_request([ { 'Name' => 'Kirk', 'Rank' => 'Captain' } ])
-    relation = @table
-      .where('Rank' => 'Captain')
-      .order('Name' => 'Asc')
-      .limit(1)
+    relation = @table.where('Rank' => 'Captain').order('Name' => 'Asc').limit(1)
 
     assert relation.class.included_modules.include?(Enumerable)
     assert_equal(['Kirk'], relation.map { |record| record['Name'] })
