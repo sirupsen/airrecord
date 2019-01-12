@@ -3,6 +3,7 @@ require 'test_helper'
 class RelationTest < MiniTest::Test
   def setup
     @table = Airrecord.table("key1", "app1", "table1")
+    # stub Table.records to return options instead of making a network call
     @table.define_singleton_method(:records) { |options| options }
   end
 

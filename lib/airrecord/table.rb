@@ -122,7 +122,7 @@ module Airrecord
 
       # Delegate chainable query methods to Airrecord::Relation
       extend Forwardable
-      def relation() Airrecord::Relation.new(self) end
+      define_method(:relation) { Airrecord::Relation.new(self) }
       def_delegators :relation, :where, :limit, :order
     end
 

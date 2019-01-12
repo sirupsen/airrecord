@@ -3,17 +3,17 @@ module Airrecord
   # ActiveRecord-style query methods like #where, #order, and #limit
   class Relation
     include Enumerable
-    attr_reader :rules
+    attr_reader :conditions
 
-    DEFAULT_RULES = { where: {}, order: {} }.freeze
+    DEFAULT_CONDITIONS = { where: {}, order: {} }.freeze
 
-    def initialize(table, rules = {})
+    def initialize(table, conditions = {})
       @table = table
-      @rules = DEFAULT_RULES.merge(rules)
+      @conditions = DEFAULT_CONDITIONS.merge(conditions)
     end
 
-    def where(conditions = {})
-      new(where: rules[:where].merge(conditions))
+    def where(params = {})
+      new(where: conditions[:where].merge(params))
     end
 
     def limit(count)
@@ -21,7 +21,7 @@ module Airrecord
     end
 
     def order(params)
-      new(order: rules[:order].merge(params))
+      new(order: conditions[:order].merge(params))
     end
 
     def each(&block)
@@ -30,14 +30,14 @@ module Airrecord
 
     private
 
-    # Merge new_rules with @rules in a new relation
-    def new(new_rules)
-      self.class.new(@table, rules.merge(new_rules))
+    # Merge more_conditions with @conditions in a new Relation
+    def new(more_conditions)
+      self.class.new(@table, conditions.merge(more_conditions))
     end
 
-    # Convert rules to a hash that Table#records can parse, omitting falsy keys
+    # Convert conditions to a hash that Table#records can parse, omitting falsy keys
     def record_params
-      wheres, orders, max = rules.values_at(:where, :order, :limit)
+      wheres, orders, max = conditions.values_at(:where, :order, :limit)
       filters = wheres.map { |key, val| "{#{key}} = '#{val}'" }
       [
         [:filter, filters.any? ? "AND(#{filters.join(', ')})" : nil],
