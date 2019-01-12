@@ -1,10 +1,12 @@
-# 1.0.2 (unreleased)
+# 1.0.2
 
 * When a `has_one` or `belongs_to` association is empty, return `nil` instead of
   a blank record (#51)
 
 * When a `has_many` association is empty, do not make a network call to the
   associated table
+
+* Relax dependency on `net-http-persistent` to allow latest (#57)
 
 # 1.0.1
 
