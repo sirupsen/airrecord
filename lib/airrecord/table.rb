@@ -54,8 +54,8 @@ module Airrecord
         records(filter: formula).sort_by { |record| or_args.index(record.id) }
       end
 
-      def create(fields)
-        new(fields).tap { |record| record.save }
+      def create(fields, request_options: {})
+        new(fields).tap { |record| record.save(request_options: request_options) }
       end
 
       def records(filter: nil, sort: nil, view: nil, offset: nil, paginate: true, fields: nil, max_records: nil, page_size: nil)
@@ -129,10 +129,14 @@ module Airrecord
       fields[key] = value
     end
 
-    def create
+    def create(request_options: {})
       raise Error, "Record already exists (record has an id)" unless new_record?
 
-      body = { fields: serializable_fields }.to_json
+      body = {
+        fields: serializable_fields,
+        **request_options,
+      }.to_json
+
       response = client.connection.post("/v0/#{self.class.base_key}/#{client.escape(self.class.table_name)}", body, { 'Content-Type' => 'application/json' })
       parsed_response = client.parse(response.body)
 
@@ -145,8 +149,8 @@ module Airrecord
       end
     end
 
-    def save
-      return create if new_record?
+    def save(request_options: {})
+      return create(request_options: request_options) if new_record?
 
       return true if @updated_keys.empty?
 
@@ -154,7 +158,8 @@ module Airrecord
       body = {
         fields: Hash[@updated_keys.map { |key|
           [key, fields[key]]
-        }]
+        }],
+        **request_options,
       }.to_json
 
       response = client.connection.patch("/v0/#{self.class.base_key}/#{client.escape(self.class.table_name)}/#{self.id}", body, { 'Content-Type' => 'application/json' })
