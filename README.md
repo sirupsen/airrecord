@@ -229,13 +229,13 @@ This is also supported when updating existing records with the `#save` method.
 ```ruby
 tea = Tea.create(
   {"Name" => "Feng Gang", "Type" => "Green", "Country" => "China"},
-  request_options: {"typecast" => true},
+  {"typecast" => true},
 )
 
 # Or with the #save method:
 tea = Tea.new({"Name" => "Feng Gang", "Type" => "Green"})
 tea["Name"] = "Feng Gang"
-tea.save(request_options: {"typecast" => true})
+tea.save("typecast" => true)
 ```
 
 _Earlier versions of airrecord provided methods for snake-cased column names

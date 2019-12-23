@@ -11,7 +11,7 @@ class Minitest::Test
     end
   end
 
-  def stub_post_request(record, table: @table, status: 200, headers: {}, request_options: {}, return_body: nil)
+  def stub_post_request(record, table: @table, status: 200, headers: {}, options: {}, return_body: nil)
     return_body ||= {
       id: SecureRandom.hex(16),
       fields: record.serializable_fields,
@@ -21,7 +21,7 @@ class Minitest::Test
 
     request_body = {
       fields: record.serializable_fields,
-      **request_options,
+      **options,
     }.to_json
 
     @stubs.post("/v0/#{table.base_key}/#{table.table_name}", request_body) do |env|
@@ -29,7 +29,7 @@ class Minitest::Test
     end
   end
 
-  def stub_patch_request(record, updated_keys, table: @table, status: 200, headers: {}, request_options: {}, return_body: nil)
+  def stub_patch_request(record, updated_keys, table: @table, status: 200, headers: {}, options: {}, return_body: nil)
     return_body ||= { fields: record.fields }
     return_body = return_body.to_json
 
@@ -37,7 +37,7 @@ class Minitest::Test
       fields: Hash[updated_keys.map { |key|
         [key, record.fields[key]]
       }],
-      **request_options,
+      **options,
     }.to_json
     @stubs.patch("/v0/#{@table.base_key}/#{@table.table_name}/#{record.id}", request_body) do |env|
       [status, headers, return_body]
