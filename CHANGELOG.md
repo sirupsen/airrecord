@@ -1,3 +1,7 @@
+# 1.0.3
+
+* Allow passing optional parameters, e.g. `typecast: true`. (#67)
+
 # 1.0.2
 
 * When a `has_one` or `belongs_to` association is empty, return `nil` instead of
