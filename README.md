@@ -222,6 +222,22 @@ tea.save
 Note that column names need to match the exact column names in Airtable,
 otherwise Airrecord will throw an error that no column matches it.
 
+
+If you need to include optional request parameters, such as the `typecast` parameter, these can be passed to either `Table.create` or `#save`.
+This is also supported when updating existing records with the `#save` method.
+
+```ruby
+tea = Tea.create(
+  {"Name" => "Feng Gang", "Type" => "Green", "Country" => "China"},
+  {"typecast" => true},
+)
+
+# Or with the #save method:
+tea = Tea.new({"Name" => "Feng Gang", "Type" => "Green"})
+tea["Name"] = "Feng Gang"
+tea.save("typecast" => true)
+```
+
 _Earlier versions of airrecord provided methods for snake-cased column names
 and symbols, however this proved error-prone without a proper schema API from
 Airtable which has still not been released._

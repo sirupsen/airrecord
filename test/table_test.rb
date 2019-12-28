@@ -135,6 +135,15 @@ class TableTest < Minitest::Test
     assert record.save
   end
 
+  def test_change_value_and_update_with_typecast_enabled
+    record = first_record
+
+    record["Name"] = "new_name"
+    stub_patch_request(record, ["Name"], options: {typecast: true})
+
+    assert record.save(typecast: true)
+  end
+
   def test_change_value_then_save_again_should_noop
     record = first_record
 
@@ -221,6 +230,14 @@ class TableTest < Minitest::Test
     assert record.create
   end
 
+  def test_create_new_record_with_typecast_enabled
+    record = @table.new("Name" => "omg")
+
+    stub_post_request(record, options: {typecast: true})
+
+    assert record.create(typecast: true)
+  end
+
   def test_create_existing_record_fails
     record = @table.new("Name" => "omg")
 
@@ -249,6 +266,15 @@ class TableTest < Minitest::Test
     stub_post_request(record)
 
     record = @table.create(record.fields)
+    assert record.id
+  end
+
+  def test_class_level_create_with_typecast_enabled
+    record = @table.new("Name" => "omg")
+
+    stub_post_request(record, options: {typecast: true})
+
+    record = @table.create(record.fields, typecast: true)
     assert record.id
   end
 
