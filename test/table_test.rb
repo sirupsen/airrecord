@@ -297,6 +297,7 @@ class TableTest < Minitest::Test
     record = @table.find("iodfajsofja")
     assert_equal "walrus", record["Name"]
     assert_equal "iodfajsofja", record.id
+    assert_instance_of Time, record.created_at
   end
 
   def test_find_handles_error

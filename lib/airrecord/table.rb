@@ -40,7 +40,7 @@ module Airrecord
         parsed_response = client.parse(response.body)
 
         if response.success?
-          self.new(parsed_response["fields"], id: id)
+          self.new(parsed_response["fields"], id: id, created_at: parsed_response["createdTime"])
         else
           client.handle_error(response.status, parsed_response)
         end
