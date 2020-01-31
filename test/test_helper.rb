@@ -68,6 +68,7 @@ class Minitest::Test
     return_body ||= {
       id: id,
       fields: record.fields,
+      createdTime: Time.now,
     }
     return_body = return_body.to_json
 
