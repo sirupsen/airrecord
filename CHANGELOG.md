@@ -1,3 +1,7 @@
+# 1.0.4
+
+* Correctly set `created_at` on `#find` (#68)
+
 # 1.0.3
 
 * Allow passing optional parameters, e.g. `typecast: true`. (#67)
