@@ -1,3 +1,7 @@
+# 1.0.5
+
+* Allow Faraday 1.0 (#70)
+
 # 1.0.4
 
 * Correctly set `created_at` on `#find` (#68)
