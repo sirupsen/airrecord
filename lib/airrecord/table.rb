@@ -1,7 +1,7 @@
 module Airrecord
   class Table
     class << self
-      attr_accessor :base_key, :table_name
+      attr_accessor :base_key, :table_name, :batch_limit
       attr_writer :api_key
 
       def client
@@ -11,6 +11,15 @@ module Airrecord
 
       def api_key
         defined?(@api_key) ? @api_key : Airrecord.api_key
+      end
+
+      def batch_limit
+        fallback = defined?(Airrecord.batch_limit) ? Airrecord.batch_limit : 10
+        defined?(@batch_limit) ? @batch_limit : fallback
+      end
+
+      def batch_limit=(limit)
+        @batch_limit = limit
       end
 
       def has_many(method_name, options)
@@ -56,6 +65,41 @@ module Airrecord
 
       def create(fields, options={})
         new(fields).tap { |record| record.save(options) }
+      end
+
+      def batch_update(records, options={})
+        raise Error, "Records must be an Array" unless records.is_a? Array
+
+        raise Error, "Only #{batch_limit} records can be passed at a time" if records.length > batch_limit
+
+        contains_new_records = records.any? { |record| record.new_record? }
+        if contains_new_records
+          raise Error, "Unable to update batch that contains new records"
+        end
+
+        records_by_id = records.map { |record| [record.id, record] }.to_h
+
+        # To avoid trying to update computed fields we *always* use PATCH and
+        # only include updated fields
+        records_body = records.map { |record| record.to_h(true) }
+
+        body = {
+          records: records_body,
+          **options,
+        }.to_json
+
+        response = client.connection.patch("/v0/#{self.base_key}/#{client.escape(self.table_name)}", body, { 'Content-Type' => 'application/json' })
+        parsed_response = client.parse(response.body)
+
+        if response.success?
+          parsed_response["records"].each do |server_record|
+            record_id = server_record["id"]
+            record = records_by_id[record_id]
+            record.fields = server_record["fields"]
+          end
+        else
+          client.handle_error(response.status, parsed_response)
+        end
       end
 
       def records(filter: nil, sort: nil, view: nil, offset: nil, paginate: true, fields: nil, max_records: nil, page_size: nil)
@@ -117,6 +161,13 @@ module Airrecord
       !id
     end
 
+    def to_h(only_updated_fields=false)
+      {
+        id: id,
+        fields: only_updated_fields ? updated_fields : fields
+      }
+    end
+
     def [](key)
       validate_key(key)
       fields[key]
@@ -133,7 +184,7 @@ module Airrecord
       raise Error, "Record already exists (record has an id)" unless new_record?
 
       body = {
-        fields: serializable_fields,
+        fields: fields,
         **options,
       }.to_json
 
@@ -149,16 +200,21 @@ module Airrecord
       end
     end
 
+    def updated_fields
+      Hash[@updated_keys.map { |key|
+        [key, fields[key]]
+      }]
+    end
+
     def save(options={})
       return create(options) if new_record?
 
       return true if @updated_keys.empty?
 
-      # To avoid trying to update computed fields we *always* use PATCH
+      # To avoid trying to update computed fields we *always* use PATCH and
+      # only include updated fields
       body = {
-        fields: Hash[@updated_keys.map { |key|
-          [key, fields[key]]
-        }],
+        fields: updated_fields,
         **options,
       }.to_json
 
@@ -185,27 +241,19 @@ module Airrecord
       end
     end
 
-    def serializable_fields
-      fields
-    end
-
     def ==(other)
       self.class == other.class &&
-        serializable_fields == other.serializable_fields
+        fields == other.fields
     end
 
     alias_method :eql?, :==
-
-    def hash
-      serializable_fields.hash
-    end
-
-    protected
 
     def fields=(fields)
       @updated_keys = []
       @fields = fields
     end
+
+    protected
 
     def created_at=(created_at)
       return unless created_at

@@ -120,6 +120,33 @@ class TableTest < Minitest::Test
     assert_equal "testest", record["Name"]
   end
 
+  def test_updated_fields
+    record = first_record
+    record["Name"] = "testest"
+    assert_equal "testest", record.updated_fields["Name"]
+    # Make sure "Notes" field isn't in updated_fields, it hasn't been updated
+    assert_nil record.updated_fields["Notes"]
+  end
+
+  def test_to_h
+    record = first_record
+
+    h = record.to_h
+    assert h[:id].is_a? String
+    assert_equal h[:fields]["Name"], "omg"
+  end
+
+  def test_to_h_only_updated_fields
+    record = first_record
+    record["Name"] = "testest"
+
+    h = record.to_h(true)
+    assert h[:id].is_a? String
+    assert_equal h[:fields]["Name"], "testest"
+    # Make sure "Notes" field isn't in updated_fields, it hasn't been updated
+    assert_nil h[:fields]["Notes"]
+  end
+
   def test_change_value_on_column_name
     record = first_record
     record["Name"] = "testest"
@@ -208,6 +235,31 @@ class TableTest < Minitest::Test
     stub_post_request(record)
 
     assert record.save
+  end
+
+  def test_batch_update_fails_unless_array
+    record = @table.new("Name" => "omg")
+    assert_raises Airrecord::Error do
+      @table.batch_update(record)
+    end
+  end
+
+  def test_batch_update_fails_if_exceeds_batch_limit
+    @table.batch_limit = 2
+    record1 = @table.new("Name" => "omg1")
+    record2 = @table.new("Name" => "omg2")
+    record3 = @table.new("Name" => "omg3")
+    assert_raises Airrecord::Error do
+      @table.batch_update([record1, record2, record3])
+    end
+  end
+
+
+  def test_batch_update_fails_if_new_record
+    record = @table.new("Name" => "omg")
+    assert_raises Airrecord::Error do
+      @table.batch_update([record])
+    end
   end
 
   def test_existing_record_is_not_new
@@ -377,7 +429,7 @@ class TableTest < Minitest::Test
     walrus = Walrus.new("Name" => "Wally")
     foot = Foot.new("Name" => "FrontRight", "walrus" => walrus)
 
-    foot.serializable_fields
+    foot.fields
   end
 
   def test_dont_update_if_equal
@@ -398,19 +450,5 @@ class TableTest < Minitest::Test
     walrus2 = Walrus.new("Name" => "Wally2")
 
     assert !walrus1.eql?(walrus2)
-  end
-
-  def test_equivalent_hash_equality
-    walrus1 = Walrus.new("Name" => "Wally")
-    walrus2 = Walrus.new("Name" => "Wally")
-
-    assert_equal walrus1.hash, walrus2.hash
-  end
-
-  def test_non_equivalent_hash_inequality
-    walrus1 = Walrus.new("Name" => "Wally")
-    walrus2 = Walrus.new("Name" => "Wally2")
-
-    assert walrus1.hash != walrus2.hash
   end
 end

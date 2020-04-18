@@ -14,13 +14,13 @@ class Minitest::Test
   def stub_post_request(record, table: @table, status: 200, headers: {}, options: {}, return_body: nil)
     return_body ||= {
       id: SecureRandom.hex(16),
-      fields: record.serializable_fields,
+      fields: record.fields,
       createdTime: Time.now,
     }
     return_body = return_body.to_json
 
     request_body = {
-      fields: record.serializable_fields,
+      fields: record.fields,
       **options,
     }.to_json
 
@@ -40,6 +40,23 @@ class Minitest::Test
       **options,
     }.to_json
     @stubs.patch("/v0/#{@table.base_key}/#{@table.table_name}/#{record.id}", request_body) do |env|
+      [status, headers, return_body]
+    end
+  end
+
+  def stub_update_batch_request(records, table: @table, status: 200, headers: {}, options: {}, return_body: nil)
+    unless return_body
+      return_body_records = records.map { |record| record.to_h(true) }
+      return_body = { records: return_body_records }
+    end
+    return_body = return_body.to_json
+
+    request_body_records = records.map { |record| record.to_h(true) }
+    request_body = {
+      records: request_body_records,
+      **options,
+    }.to_json
+    @stubs.patch("/v0/#{@table.base_key}/#{@table.table_name}", request_body) do |env|
       [status, headers, return_body]
     end
   end
