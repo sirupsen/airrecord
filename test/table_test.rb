@@ -254,7 +254,6 @@ class TableTest < Minitest::Test
     end
   end
 
-
   def test_batch_update_fails_if_new_record
     record = @table.new("Name" => "omg")
     assert_raises Airrecord::Error do
