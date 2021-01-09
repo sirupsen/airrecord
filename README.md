@@ -255,6 +255,8 @@ tea["Village"] = "Feng Gang"
 tea.save # persist to Airtable
 ```
 
+_Airtable's API doesn't allow you to change attachment's filename. As a workaround you can delete the original attachment and [upload a new one](https://github.com/sirupsen/airrecord#file-uploads) with the original URL and a new filename._
+
 ### Deleting
 
 An instantiated record can be deleted through `#destroy`:
