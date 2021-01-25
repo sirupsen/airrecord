@@ -5,13 +5,13 @@ require 'securerandom'
 require 'minitest/autorun'
 
 class Minitest::Test
-  def stub_delete_request(id, table: @table, status: 202, response_body: "")
-    @stubs.delete("/v0/#{@table.base_key}/#{@table.table_name}/#{id}") do |env|
+  def stub_delete_request(id:, table: @table, status: 202, response_body: "")
+    @stubs.delete("/v0/#{table.base_key}/#{table.table_name}/#{id}") do |env|
       [status, {}, response_body]
     end
   end
 
-  def stub_post_request(record, table: @table, status: 200, headers: {}, options: {}, return_body: nil)
+  def stub_post_request(record:, table: @table, status: 200, headers: {}, options: {}, return_body: nil)
     return_body ||= {
       id: SecureRandom.hex(16),
       fields: record.serializable_fields,
@@ -29,7 +29,7 @@ class Minitest::Test
     end
   end
 
-  def stub_patch_request(record, updated_keys, table: @table, status: 200, headers: {}, options: {}, return_body: nil)
+  def stub_patch_request(record:, updated_keys:, table: @table, status: 200, headers: {}, options: {}, return_body: nil)
     return_body ||= { fields: record.fields }
     return_body = return_body.to_json
 
@@ -39,13 +39,13 @@ class Minitest::Test
       }],
       **options,
     }.to_json
-    @stubs.patch("/v0/#{@table.base_key}/#{@table.table_name}/#{record.id}", request_body) do |env|
+    @stubs.patch("/v0/#{table.base_key}/#{table.table_name}/#{record.id}", request_body) do |env|
       [status, headers, return_body]
     end
   end
 
   # TODO: Problem, can't stub on params.
-  def stub_request(records, table: @table, status: 200, headers: {}, offset: nil, clear: true)
+  def stub_request(records:, table: @table, status: 200, headers: {}, offset: nil, clear: true)
     @stubs.instance_variable_set(:@stack, {}) if clear
 
     body = {
@@ -64,7 +64,7 @@ class Minitest::Test
     end
   end
 
-  def stub_find_request(record = nil, table: @table, status: 200, headers: {}, return_body: nil, id: nil)
+  def stub_find_request(record: nil, table: @table, status: 200, headers: {}, return_body: nil, id: nil)
     return_body ||= {
       id: id,
       fields: record.fields,

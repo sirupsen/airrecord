@@ -25,7 +25,7 @@ class TableTest < Minitest::Test
       builder.adapter :test, @stubs
     }
 
-    stub_request([{"Name" => "omg", "Notes" => "hello world"}, {"Name" => "more", "Notes" => "walrus"}])
+    stub_request(records: [{"Name" => "omg", "Notes" => "hello world"}, {"Name" => "more", "Notes" => "walrus"}])
   end
 
   def test_table_overrides_key
@@ -48,14 +48,14 @@ class TableTest < Minitest::Test
   end
 
   def test_filter_records
-    stub_request([{"Name" => "yes"}, {"Name" => "no"}])
+    stub_request(records: [{"Name" => "yes"}, {"Name" => "no"}])
 
     records = @table.records(filter: "Name")
     assert_equal "yes", records[0]["Name"]
   end
 
   def test_sort_records
-    stub_request([{"Name" => "a"}, {"Name" => "b"}])
+    stub_request(records: [{"Name" => "a"}, {"Name" => "b"}])
 
     records = @table.records(sort: { "Name" => 'asc' })
     assert_equal "a", records[0]["Name"]
@@ -63,7 +63,7 @@ class TableTest < Minitest::Test
   end
 
   def test_view_records
-    stub_request([{"Name" => "a"}, {"Name" => "a"}])
+    stub_request(records: [{"Name" => "a"}, {"Name" => "a"}])
 
     records = @table.records(view: 'A')
     assert_equal "a", records[0]["Name"]
@@ -71,18 +71,18 @@ class TableTest < Minitest::Test
   end
 
   def test_follow_pagination_by_default
-    stub_request([{"Name" => "1"}, {"Name" => "2"}], offset: 'dasfuhiu')
-    stub_request([{"Name" => "3"}, {"Name" => "4"}], offset: 'odjafio', clear: false)
-    stub_request([{"Name" => "5"}, {"Name" => "6"}], clear: false)
+    stub_request(records: [{"Name" => "1"}, {"Name" => "2"}], offset: 'dasfuhiu')
+    stub_request(records: [{"Name" => "3"}, {"Name" => "4"}], offset: 'odjafio', clear: false)
+    stub_request(records: [{"Name" => "5"}, {"Name" => "6"}], clear: false)
 
     records = @table.records
     assert_equal 6, records.size
   end
 
   def test_dont_follow_pagination_if_disabled
-    stub_request([{"Name" => "1"}, {"Name" => "2"}], offset: 'dasfuhiu')
-    stub_request([{"Name" => "3"}, {"Name" => "4"}], offset: 'odjafio', clear: false)
-    stub_request([{"Name" => "5"}, {"Name" => "6"}], clear: false)
+    stub_request(records: [{"Name" => "1"}, {"Name" => "2"}], offset: 'dasfuhiu')
+    stub_request(records: [{"Name" => "3"}, {"Name" => "4"}], offset: 'odjafio', clear: false)
+    stub_request(records: [{"Name" => "5"}, {"Name" => "6"}], clear: false)
 
     records = @table.records(paginate: false)
     assert_equal 2, records.size
@@ -130,7 +130,7 @@ class TableTest < Minitest::Test
     record = first_record
 
     record["Name"] = "new_name"
-    stub_patch_request(record, ["Name"])
+    stub_patch_request(record: record, updated_keys: ["Name"])
 
     assert record.save
   end
@@ -139,7 +139,7 @@ class TableTest < Minitest::Test
     record = first_record
 
     record["Name"] = "new_name"
-    stub_patch_request(record, ["Name"], options: {typecast: true})
+    stub_patch_request(record: record, updated_keys: ["Name"], options: {typecast: true})
 
     assert record.save(typecast: true)
   end
@@ -148,7 +148,7 @@ class TableTest < Minitest::Test
     record = first_record
 
     record["Name"] = "new_name"
-    stub_patch_request(record, ["Name"])
+    stub_patch_request(record: record, updated_keys: ["Name"])
 
     assert record.save
     assert record.save
@@ -170,7 +170,7 @@ class TableTest < Minitest::Test
     record = first_record
 
     record["Name"] = "new_name"
-    stub_patch_request(record, ["Name"], return_body: { fields: record.fields.merge("Notes" => "new animal") })
+    stub_patch_request(record: record, updated_keys: ["Name"], return_body: { fields: record.fields.merge("Notes" => "new animal") })
 
     assert record.save
     assert_equal "new_name", record["Name"]
@@ -181,7 +181,7 @@ class TableTest < Minitest::Test
     record = first_record
 
     record["Name"] = "new_name"
-    stub_patch_request(record, ["Name"], return_body: { error: { type: "oh noes", message: 'yes' } }, status: 401)
+    stub_patch_request(record: record, updated_keys: ["Name"], return_body: { error: { type: "oh noes", message: 'yes' } }, status: 401)
 
     assert_raises Airrecord::Error do
       record.save
@@ -192,20 +192,20 @@ class TableTest < Minitest::Test
     record = first_record
 
     record["Name"] = "new_name"
-    stub_patch_request(record, ["Name"], return_body: { error: { type: "oh noes", message: 'yes' } }, status: 401)
+    stub_patch_request(record: record, updated_keys: ["Name"], return_body: { error: { type: "oh noes", message: 'yes' } }, status: 401)
 
     assert_raises Airrecord::Error do
       record.save
     end
 
-    stub_patch_request(record, ["Name"])
+    stub_patch_request(record: record, updated_keys: ["Name"])
     assert record.save
   end
 
   def test_update_creates_if_new_record
     record = @table.new("Name" => "omg")
 
-    stub_post_request(record)
+    stub_post_request(record: record)
 
     assert record.save
   end
@@ -225,7 +225,7 @@ class TableTest < Minitest::Test
   def test_create_new_record
     record = @table.new("Name" => "omg")
 
-    stub_post_request(record)
+    stub_post_request(record: record)
 
     assert record.create
   end
@@ -233,7 +233,7 @@ class TableTest < Minitest::Test
   def test_create_new_record_with_typecast_enabled
     record = @table.new("Name" => "omg")
 
-    stub_post_request(record, options: {typecast: true})
+    stub_post_request(record: record, options: {typecast: true})
 
     assert record.create(typecast: true)
   end
@@ -241,7 +241,7 @@ class TableTest < Minitest::Test
   def test_create_existing_record_fails
     record = @table.new("Name" => "omg")
 
-    stub_post_request(record)
+    stub_post_request(record: record)
 
     assert record.create
 
@@ -253,7 +253,7 @@ class TableTest < Minitest::Test
   def test_create_handles_error
     record = @table.new("Name" => "omg")
 
-    stub_post_request(record, status: 401, return_body: { error: { type: "omg", message: "wow" }})
+    stub_post_request(record: record, status: 401, return_body: { error: { type: "omg", message: "wow" }})
 
     assert_raises Airrecord::Error do
       record.create
@@ -263,7 +263,7 @@ class TableTest < Minitest::Test
   def test_class_level_create
     record = @table.new("Name" => "omg")
 
-    stub_post_request(record)
+    stub_post_request(record: record)
 
     record = @table.create(record.fields)
     assert record.id
@@ -272,7 +272,7 @@ class TableTest < Minitest::Test
   def test_class_level_create_with_typecast_enabled
     record = @table.new("Name" => "omg")
 
-    stub_post_request(record, options: {typecast: true})
+    stub_post_request(record: record, options: {typecast: true})
 
     record = @table.create(record.fields, typecast: true)
     assert record.id
@@ -281,7 +281,7 @@ class TableTest < Minitest::Test
   def test_class_level_create_handles_error
     record = @table.new("Name" => "omg")
 
-    stub_post_request(record, status: 401, return_body: { error: { type: "omg", message: "wow" }})
+    stub_post_request(record: record, status: 401, return_body: { error: { type: "omg", message: "wow" }})
 
     assert_raises Airrecord::Error do
       @table.create record.fields
@@ -292,7 +292,7 @@ class TableTest < Minitest::Test
   def test_find
     record = @table.new("Name" => "walrus")
 
-    stub_find_request(record, id: "iodfajsofja")
+    stub_find_request(record: record, id: "iodfajsofja")
 
     record = @table.find("iodfajsofja")
     assert_equal "walrus", record["Name"]
@@ -301,7 +301,7 @@ class TableTest < Minitest::Test
   end
 
   def test_find_handles_error
-    stub_find_request(nil, return_body: { error: { type: "not found", message: "not found" } }, id: "noep", status: 404)
+    stub_find_request(record: nil, return_body: { error: { type: "not found", message: "not found" } }, id: "noep", status: 404)
 
     assert_raises Airrecord::Error do
       @table.find("noep")
@@ -314,7 +314,7 @@ class TableTest < Minitest::Test
   end
 
   def test_find_many_makes_no_network_call_when_ids_are_empty
-    stub_request([], status: 500)
+    stub_request(records: [], status: 500)
 
     assert_equal([], @table.find_many([]))
   end
@@ -329,13 +329,13 @@ class TableTest < Minitest::Test
 
   def test_destroy_record
     record = first_record
-    stub_delete_request(record.id)
+    stub_delete_request(id: record.id)
     assert record.destroy
   end
 
   def test_fail_destroy_record
     record = first_record
-    stub_delete_request(record.id, status: 404, response_body: { error: { type: "not found", message: "whatever" } }.to_json)
+    stub_delete_request(id: record.id, status: 404, response_body: { error: { type: "not found", message: "whatever" } }.to_json)
 
     assert_raises Airrecord::Error do
       record.destroy
@@ -345,7 +345,7 @@ class TableTest < Minitest::Test
   def test_error_handles_errors_without_body
     record = first_record
 
-    stub_delete_request(record.id, status: 500)
+    stub_delete_request(id: record.id, status: 500)
 
     assert_raises Airrecord::Error do
       record.destroy
@@ -353,7 +353,7 @@ class TableTest < Minitest::Test
   end
 
   def test_dates_are_not_type_casted
-    stub_request([{"Name" => "omg", "Created" => Time.now.to_s}])
+    stub_request(records: [{"Name" => "omg", "Created" => Time.now.to_s}])
 
     record = first_record
     assert_instance_of String, record["Created"]

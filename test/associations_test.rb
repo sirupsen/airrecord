@@ -41,7 +41,7 @@ class AssociationsTest < MiniTest::Test
       { "id" => "rec2", "Name" => "Good brew" },
       { "id" => "rec1", "Name" => "Decent brew" }
     ]
-    stub_request(brews, table: Brew)
+    stub_request(records: brews, table: Brew)
 
     assert_equal 2, tea.brews.size
     assert_kind_of Airrecord::Table, tea.brews.first
@@ -50,14 +50,14 @@ class AssociationsTest < MiniTest::Test
 
   def test_has_many_handles_empty_associations
     tea = Tea.new("Name" => "Gunpowder")
-    stub_request([{ "id" => "brew1", "Name" => "unrelated"  }], table: Brew)
+    stub_request(records: [{ "id" => "brew1", "Name" => "unrelated"  }], table: Brew)
     assert_equal 0, tea.brews.size
   end
 
   def test_belongs_to
     brew = Brew.new("Name" => "Good Brew", "Tea" => ["rec1"])
     tea = Tea.new("Name" => "Dong Ding", "Brews" => ["rec2"])
-    stub_find_request(tea, table: Tea, id: "rec1")
+    stub_find_request(record: tea, table: Tea, id: "rec1")
 
     assert_equal "rec1", brew.tea.id
   end
@@ -65,7 +65,7 @@ class AssociationsTest < MiniTest::Test
   def test_has_one
     tea = Tea.new("id" => "rec1", "Name" => "Sencha", "Teapot" => ["rec3"])
     pot = Teapot.new("Name" => "Cast Iron", "Tea" => ["rec1"])
-    stub_find_request(pot, table: Teapot, id: "rec3")
+    stub_find_request(record: pot, table: Teapot, id: "rec3")
 
     assert_equal "rec3", tea.pot.id
   end
@@ -78,11 +78,11 @@ class AssociationsTest < MiniTest::Test
 
   def test_build_association_from_strings
     tea = Tea.new({"Name" => "Jingning", "Brews" => ["rec2", "rec1"]})
-    stub_post_request(tea, table: Tea)
+    stub_post_request(record: tea, table: Tea)
 
     tea.create
 
-    stub_request([{ id: "rec2" }, { id: "rec1" }], table: Brew)
+    stub_request(records: [{ id: "rec2" }, { id: "rec1" }], table: Brew)
     assert_equal 2, tea.brews.count
   end
 
@@ -90,11 +90,11 @@ class AssociationsTest < MiniTest::Test
     tea = Tea.new({"Name" => "Jingning", "Brews" => []}, id: "rec1")
     brew = Brew.new("Name" => "greeaat")
     brew.tea = tea
-    stub_post_request(brew, table: Brew)
+    stub_post_request(record: brew, table: Brew)
 
     brew.create
 
-    stub_find_request(tea, table: Tea, id: "rec1")
+    stub_find_request(record: tea, table: Tea, id: "rec1")
     assert_equal tea.id, brew.tea.id
   end
 
@@ -102,7 +102,7 @@ class AssociationsTest < MiniTest::Test
     tea = Tea.new("Name" => "Earl Grey")
     brews = %w[Perfect Meh].each_with_object([]) do |name, memo|
       brew = Brew.new("Name" => name)
-      stub_post_request(brew, table: Brew)
+      stub_post_request(record: brew, table: Brew)
       brew.create
       memo << brew
     end
@@ -110,7 +110,7 @@ class AssociationsTest < MiniTest::Test
     tea.brews = brews
 
     brew_fields = brews.map { |brew| brew.fields.merge("id" => brew.id) }
-    stub_request(brew_fields, table: Brew)
+    stub_request(records: brew_fields, table: Brew)
 
     assert_equal 2, tea.brews.size
     assert_kind_of Airrecord::Table, tea.brews.first
