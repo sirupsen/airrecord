@@ -6,10 +6,10 @@ module Airrecord
       attr_accessor :requests
     end
 
-    def initialize(app, requests_per_second: nil, sleeper: nil)
+    def initialize(app, **kwargs)
       super(app)
-      @rps = requests_per_second
-      @sleeper = sleeper || ->(seconds) { sleep(seconds) }
+      @rps = kwargs[:requests_per_second]
+      @sleeper = kwargs[:sleeper] || ->(seconds) { sleep(seconds) }
       @mutex = Mutex.new
       clear
     end

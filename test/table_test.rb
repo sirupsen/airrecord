@@ -203,7 +203,7 @@ class TableTest < Minitest::Test
   end
 
   def test_update_creates_if_new_record
-    record = @table.new("Name" => "omg")
+    record = @table.new(fields: {"Name" => "omg"})
 
     stub_post_request(record: record)
 
@@ -215,7 +215,7 @@ class TableTest < Minitest::Test
   end
 
   def test_build_new_record
-    record = @table.new("Name" => "omg")
+    record = @table.new(fields: {"Name" => "omg"})
 
     refute record.id
     refute record.created_at
@@ -223,7 +223,7 @@ class TableTest < Minitest::Test
   end
 
   def test_create_new_record
-    record = @table.new("Name" => "omg")
+    record = @table.new(fields: {"Name" => "omg"})
 
     stub_post_request(record: record)
 
@@ -231,7 +231,7 @@ class TableTest < Minitest::Test
   end
 
   def test_create_new_record_with_typecast_enabled
-    record = @table.new("Name" => "omg")
+    record = @table.new(fields: {"Name" => "omg"})
 
     stub_post_request(record: record, options: {typecast: true})
 
@@ -239,7 +239,7 @@ class TableTest < Minitest::Test
   end
 
   def test_create_existing_record_fails
-    record = @table.new("Name" => "omg")
+    record = @table.new(fields: {"Name" => "omg"})
 
     stub_post_request(record: record)
 
@@ -251,7 +251,7 @@ class TableTest < Minitest::Test
   end
 
   def test_create_handles_error
-    record = @table.new("Name" => "omg")
+    record = @table.new(fields: {"Name" => "omg"})
 
     stub_post_request(record: record, status: 401, return_body: { error: { type: "omg", message: "wow" }})
 
@@ -261,7 +261,7 @@ class TableTest < Minitest::Test
   end
 
   def test_class_level_create
-    record = @table.new("Name" => "omg")
+    record = @table.new(fields: {"Name" => "omg"})
 
     stub_post_request(record: record)
 
@@ -270,7 +270,7 @@ class TableTest < Minitest::Test
   end
 
   def test_class_level_create_with_typecast_enabled
-    record = @table.new("Name" => "omg")
+    record = @table.new(fields: {"Name" => "omg"})
 
     stub_post_request(record: record, options: {typecast: true})
 
@@ -279,7 +279,7 @@ class TableTest < Minitest::Test
   end
 
   def test_class_level_create_handles_error
-    record = @table.new("Name" => "omg")
+    record = @table.new(fields: {"Name" => "omg"})
 
     stub_post_request(record: record, status: 401, return_body: { error: { type: "omg", message: "wow" }})
 
@@ -290,7 +290,7 @@ class TableTest < Minitest::Test
 
 
   def test_find
-    record = @table.new("Name" => "walrus")
+    record = @table.new(fields: {"Name" => "walrus"})
 
     stub_find_request(record: record, id: "iodfajsofja")
 
@@ -320,7 +320,7 @@ class TableTest < Minitest::Test
   end
 
   def test_destroy_new_record_fails
-    record = @table.new("Name" => "walrus")
+    record = @table.new(fields: {"Name" => "walrus"})
 
     assert_raises Airrecord::Error do
       record.destroy
@@ -360,56 +360,56 @@ class TableTest < Minitest::Test
   end
 
   def test_comparison
-    alpha = @table.new("Name" => "Name", "Created" => Time.at(0))
-    beta = @table.new("Name" => "Name", "Created" => Time.at(0))
+    alpha = @table.new(fields: {"Name" => "Name", "Created" => Time.at(0)})
+    beta = @table.new(fields: {"Name" => "Name", "Created" => Time.at(0)})
 
     assert_equal alpha, beta
   end
 
   def test_comparison_different_classes
-    alpha = @table.new("Name" => "Name", "Created" => Time.at(0))
-    beta = Walrus.new("Name" => "Name", "Created" => Time.at(0))
+    alpha = @table.new(fields: {"Name" => "Name", "Created" => Time.at(0)})
+    beta = Walrus.new(fields: {"Name" => "Name", "Created" => Time.at(0)})
 
     refute_equal alpha, beta
   end
 
   def test_association_accepts_non_enumerable
-    walrus = Walrus.new("Name" => "Wally")
-    foot = Foot.new("Name" => "FrontRight", "walrus" => walrus)
+    walrus = Walrus.new(fields: {"Name" => "Wally"})
+    foot = Foot.new(fields: {"Name" => "FrontRight", "walrus" => walrus})
 
     foot.serializable_fields
   end
 
   def test_dont_update_if_equal
-    walrus = Walrus.new("Name" => "Wally")
+    walrus = Walrus.new(fields: {"Name" => "Wally"})
     walrus["Name"] = "Wally"
     assert walrus.updated_keys.empty?
   end
 
   def test_equivalent_records_are_eql?
-    walrus1 = Walrus.new("Name" => "Wally")
-    walrus2 = Walrus.new("Name" => "Wally")
+    walrus1 = Walrus.new(fields: {"Name" => "Wally"})
+    walrus2 = Walrus.new(fields: {"Name" => "Wally"})
 
     assert walrus1.eql? walrus2
   end
 
   def test_non_equivalent_records_fail_eql?
-    walrus1 = Walrus.new("Name" => "Wally")
-    walrus2 = Walrus.new("Name" => "Wally2")
+    walrus1 = Walrus.new(fields: {"Name" => "Wally"})
+    walrus2 = Walrus.new(fields: {"Name" => "Wally2"})
 
     assert !walrus1.eql?(walrus2)
   end
 
   def test_equivalent_hash_equality
-    walrus1 = Walrus.new("Name" => "Wally")
-    walrus2 = Walrus.new("Name" => "Wally")
+    walrus1 = Walrus.new(fields: {"Name" => "Wally"})
+    walrus2 = Walrus.new(fields: {"Name" => "Wally"})
 
     assert_equal walrus1.hash, walrus2.hash
   end
 
   def test_non_equivalent_hash_inequality
-    walrus1 = Walrus.new("Name" => "Wally")
-    walrus2 = Walrus.new("Name" => "Wally2")
+    walrus1 = Walrus.new(fields: {"Name" => "Wally"})
+    walrus2 = Walrus.new(fields: {"Name" => "Wally2"})
 
     assert walrus1.hash != walrus2.hash
   end

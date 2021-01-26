@@ -35,7 +35,7 @@ class AssociationsTest < MiniTest::Test
   end
 
   def test_has_many_associations
-    tea = Tea.new("Name" => "Dong Ding", "Brews" => ["rec2", "rec1"])
+    tea = Tea.new(fields: {"Name" => "Dong Ding", "Brews" => ["rec2", "rec1"]})
 
     brews = [
       { "id" => "rec2", "Name" => "Good brew" },
@@ -49,35 +49,35 @@ class AssociationsTest < MiniTest::Test
   end
 
   def test_has_many_handles_empty_associations
-    tea = Tea.new("Name" => "Gunpowder")
+    tea = Tea.new(fields: {"Name" => "Gunpowder"})
     stub_request(records: [{ "id" => "brew1", "Name" => "unrelated"  }], table: Brew)
     assert_equal 0, tea.brews.size
   end
 
   def test_belongs_to
-    brew = Brew.new("Name" => "Good Brew", "Tea" => ["rec1"])
-    tea = Tea.new("Name" => "Dong Ding", "Brews" => ["rec2"])
+    brew = Brew.new(fields: {"Name" => "Good Brew", "Tea" => ["rec1"]})
+    tea = Tea.new(fields: {"Name" => "Dong Ding", "Brews" => ["rec2"]})
     stub_find_request(record: tea, table: Tea, id: "rec1")
 
     assert_equal "rec1", brew.tea.id
   end
 
   def test_has_one
-    tea = Tea.new("id" => "rec1", "Name" => "Sencha", "Teapot" => ["rec3"])
-    pot = Teapot.new("Name" => "Cast Iron", "Tea" => ["rec1"])
+    tea = Tea.new(fields: {"id" => "rec1", "Name" => "Sencha", "Teapot" => ["rec3"]})
+    pot = Teapot.new(fields: {"Name" => "Cast Iron", "Tea" => ["rec1"]})
     stub_find_request(record: pot, table: Teapot, id: "rec3")
 
     assert_equal "rec3", tea.pot.id
   end
 
   def test_has_one_handles_empty_associations
-    pot = Teapot.new("Name" => "Ceramic")
+    pot = Teapot.new(fields: {"Name" => "Ceramic"})
 
     assert_nil pot.tea
   end
 
   def test_build_association_from_strings
-    tea = Tea.new({"Name" => "Jingning", "Brews" => ["rec2", "rec1"]})
+    tea = Tea.new(fields: {"Name" => "Jingning", "Brews" => ["rec2", "rec1"]})
     stub_post_request(record: tea, table: Tea)
 
     tea.create
@@ -87,8 +87,8 @@ class AssociationsTest < MiniTest::Test
   end
 
   def test_build_belongs_to_association_from_setter
-    tea = Tea.new({"Name" => "Jingning", "Brews" => []}, id: "rec1")
-    brew = Brew.new("Name" => "greeaat")
+    tea = Tea.new(fields: {"Name" => "Jingning", "Brews" => []}, id: "rec1")
+    brew = Brew.new(fields: {"Name" => "greeaat"})
     brew.tea = tea
     stub_post_request(record: brew, table: Brew)
 
@@ -99,9 +99,9 @@ class AssociationsTest < MiniTest::Test
   end
 
   def test_build_has_many_association_from_setter
-    tea = Tea.new("Name" => "Earl Grey")
+    tea = Tea.new(fields: {"Name" => "Earl Grey"})
     brews = %w[Perfect Meh].each_with_object([]) do |name, memo|
-      brew = Brew.new("Name" => name)
+      brew = Brew.new(fields: {"Name" => name})
       stub_post_request(record: brew, table: Brew)
       brew.create
       memo << brew
