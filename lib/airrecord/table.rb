@@ -1,3 +1,5 @@
+require 'rubygems' # For Gem::Version
+
 module Airrecord
   class Table
     class << self
@@ -107,10 +109,20 @@ module Airrecord
 
     attr_reader :fields, :id, :created_at, :updated_keys
 
-    def initialize(fields, id: nil, created_at: nil)
-      @id = id
-      self.created_at = created_at
-      self.fields = fields
+    # This is an awkward definition for Ruby 3 to remain backwards compatible.
+    # It's easier to read by reading the 2.x definition below.
+    if Gem::Version.new(RUBY_VERSION) >= Gem::Version.new("3.0.0")
+      def initialize(*one, **two)
+        @id = one.first && two.delete(:id)
+        self.created_at = one.first && two.delete(:created_at)
+        self.fields = one.first || two
+      end
+    else
+      def initialize(fields, id: nil, created_at: nil)
+        @id = id
+        self.created_at = created_at
+        self.fields = fields
+      end
     end
 
     def new_record?

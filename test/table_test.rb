@@ -413,4 +413,26 @@ class TableTest < Minitest::Test
 
     assert walrus1.hash != walrus2.hash
   end
+
+  def test_complex_arguments
+    mock_time = Time.now.to_s
+    mock_id = 1
+
+    walrus = Walrus.new({"Name" => "Wally"}, created_at: mock_time, id: mock_id)
+    assert_equal mock_time, walrus.created_at.to_s
+    assert_equal mock_id, walrus.id
+    assert_equal "Wally", walrus["Name"]
+
+    walrus = Walrus.new("Name" => "Wally", created_at: mock_time, id: mock_id)
+    assert_equal "", walrus.created_at.to_s
+    assert_nil walrus.id
+    assert_equal "Wally", walrus["Name"]
+
+    walrus = Walrus.new({"Name" => "Wally", created_at: mock_time, id: mock_id})
+    assert_equal "", walrus.created_at.to_s
+    assert_nil walrus.id
+    assert_nil walrus["id"]
+    assert_nil walrus["created_at"]
+    assert_equal "Wally", walrus["Name"]
+  end
 end
