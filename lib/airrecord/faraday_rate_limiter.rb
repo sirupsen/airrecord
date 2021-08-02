@@ -37,6 +37,7 @@ module Airrecord
     def too_many_requests_in_last_second?
       return false unless @rps
       return false unless requests.size >= @rps
+
       window_span < 1.0
     end
 
@@ -56,5 +57,5 @@ end
 
 Faraday::Request.register_middleware(
   # Avoid polluting the global middleware namespace with a prefix.
-  :airrecord_rate_limiter => Airrecord::FaradayRateLimiter
+  airrecord_rate_limiter: Airrecord::FaradayRateLimiter
 )

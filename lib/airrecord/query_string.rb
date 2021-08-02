@@ -25,16 +25,16 @@ module Airrecord
       end
 
       TYPES = {
-        Array => lambda { |prefix, array|
+        Array => lambda do |prefix, array|
           array.each_with_index.map do |value, index|
             self[value].call("#{prefix}[#{index}]", value)
           end
-        },
-        Hash => lambda { |prefix, hash|
+        end,
+        Hash => lambda do |prefix, hash|
           hash.map do |key, value|
             self[value].call("#{prefix}[#{key}]", value)
           end
-        },
+        end
       }.freeze
 
       DEFAULT = lambda do |key, value|

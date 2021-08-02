@@ -17,7 +17,7 @@ module Airrecord
 
       def has_many(method_name, options)
         define_method(method_name.to_sym) do
-          # Get association ids in reverse order, because Airtable’s UI and API
+          # Get association ids in reverse order, because Airtable's UI and API
           # sort associations in opposite directions. We want to match the UI.
           ids = (self[options.fetch(:column)] || []).reverse
           table = Kernel.const_get(options.fetch(:class))
@@ -56,7 +56,7 @@ module Airrecord
         records(filter: formula).sort_by { |record| or_args.index(record.id) }
       end
 
-      def create(fields, options={})
+      def create(fields, options = {})
         new(fields).tap { |record| record.save(options) }
       end
 
@@ -104,7 +104,7 @@ module Airrecord
           client.handle_error(response.status, parsed_response)
         end
       end
-      alias_method :all, :records
+      alias all records
     end
 
     attr_reader :fields, :id, :created_at, :updated_keys
@@ -137,16 +137,17 @@ module Airrecord
     def []=(key, value)
       validate_key(key)
       return if fields[key] == value # no-op
+
       @updated_keys << key
       fields[key] = value
     end
 
-    def create(options={})
+    def create(options = {})
       raise Error, "Record already exists (record has an id)" unless new_record?
 
       body = {
         fields: serializable_fields,
-        **options,
+        **options
       }.to_json
 
       response = client.connection.post("/v0/#{self.class.base_key}/#{client.escape(self.class.table_name)}", body, { 'Content-Type' => 'application/json' })
@@ -161,9 +162,8 @@ module Airrecord
       end
     end
 
-    def save(options={})
+    def save(options = {})
       return create(options) if new_record?
-
       return true if @updated_keys.empty?
 
       # To avoid trying to update computed fields we *always* use PATCH
@@ -171,7 +171,7 @@ module Airrecord
         fields: Hash[@updated_keys.map { |key|
           [key, fields[key]]
         }],
-        **options,
+        **options
       }.to_json
 
       response = client.connection.patch("/v0/#{self.class.base_key}/#{client.escape(self.class.table_name)}/#{self.id}", body, { 'Content-Type' => 'application/json' })
@@ -205,8 +205,7 @@ module Airrecord
       self.class == other.class &&
         serializable_fields == other.serializable_fields
     end
-
-    alias_method :eql?, :==
+    alias eql? ==
 
     def hash
       serializable_fields.hash
@@ -221,6 +220,7 @@ module Airrecord
 
     def created_at=(created_at)
       return unless created_at
+
       @created_at = Time.parse(created_at)
     end
 
@@ -230,6 +230,7 @@ module Airrecord
 
     def validate_key(key)
       return true unless key.is_a?(Symbol)
+
       raise(Error, [
         "Airrecord 1.0 dropped support for Symbols as field names.",
         "Please use the raw field name, a String, instead.",
