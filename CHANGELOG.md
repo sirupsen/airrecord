@@ -1,3 +1,7 @@
+# 1.0.7
+
+* Further Ruby 3 compatibility, in particular with Faraday (#83)
+
 # 1.0.6
 
 * Ruby 3 compatibility
