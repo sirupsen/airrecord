@@ -11,7 +11,7 @@ class Minitest::Test
     end
   end
 
-  def stub_post_request(record, table: @table, status: 200, headers: {}, options: {}, return_body: nil)
+  def stub_post_request(record, table: @table, status: 200, headers: {}, options: {}, return_body: nil, request_body: nil)
     return_body ||= {
       id: SecureRandom.hex(16),
       fields: record.serializable_fields,
@@ -19,10 +19,11 @@ class Minitest::Test
     }
     return_body = return_body.to_json
 
-    request_body = {
+    request_body ||= {
       fields: record.serializable_fields,
       **options,
-    }.to_json
+    }
+    request_body = request_body.to_json
 
     @stubs.post("/v0/#{table.base_key}/#{table.table_name}", request_body) do |env|
       [status, headers, return_body]

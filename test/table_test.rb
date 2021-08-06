@@ -288,6 +288,63 @@ class TableTest < Minitest::Test
     end
   end
 
+  def test_class_level_batch_create_new_record
+    records = [{ "Name" => "Name1" }, { "Name" => "Name2" }, { "Name" => "Name3" }]
+
+    request_body_mock = {
+      records: [{ fields: { "Name" => "Name1" } }, { fields: { "Name" => "Name2" } }, { fields: { "Name" => "Name3" } }]
+    }
+
+    return_body_mock ||= { records: [
+      { id: SecureRandom.hex(16), "Name" => "Name1", createdTime: Time.now },
+      { id: SecureRandom.hex(16), "Name" => "Name2", createdTime: Time.now },
+      { id: SecureRandom.hex(16), "Name" => "Name3", createdTime: Time.now }
+    ] }
+
+    stub_post_request(records, request_body: request_body_mock, return_body: return_body_mock)
+    record = @table.batch_create(records)
+    assert_equal true, record
+  end
+
+  def test_class_level_batch_create_handles_error
+    records = [{ "Name" => "Name1" }, { "Name" => "Name2" }, { "Name" => "Name3" }]
+
+    request_body_mock = {
+      records: [{ fields: { "Name" => "Name1" } }, { fields: { "Name" => "Name2" } }, { fields: { "Name" => "Name3" } }]
+    }
+
+    stub_post_request(records, status: 401, request_body: request_body_mock, return_body: { error: { type: "went", message: "wrong" } })
+
+    assert_raises Airrecord::Error do
+      @table.batch_create(records)
+    end
+  end
+
+  def test_class_level_batch_create_too_many_chunks_error
+    records = Array.new(60, 0xF)
+
+    request_body_mock = {
+      records: [{ fields: { "Name" => "Name1" } }, { fields: { "Name" => "Name2" } }, { fields: { "Name" => "Name3" } }]
+    }
+
+    stub_post_request(records, status: 200, request_body: request_body_mock, return_body: {})
+
+    assert_raises Airrecord::Error do
+      @table.batch_create(records)
+    end
+  end
+
+  def test_class_level_batch_limit_exceeds_max
+    mock = MiniTest::Mock.new
+    mock.expect(:warn, nil, ['Airreccord: We have set the value to the maximum batch size allowed, 10.'])
+
+    @table.stub :warn, -> (arg) { mock.warn arg } do
+      @table.batch_limit = (50)
+    end
+
+    assert_equal 10, @table.batch_limit
+    assert mock.verify
+  end
 
   def test_find
     record = @table.new("Name" => "walrus")
