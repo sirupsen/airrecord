@@ -396,6 +396,38 @@ end
 Tea.find("rec3838")
 ```
 
+#### Creating in Batch
+It's possible to create multiples records using an anonymous `Airrecord::Table`. 
+
+The `#batch_create` receives an array of hashes, you can define the size of the batch passing the parameters `batch_limit: XX`, the maximum number of records permitted per request by AirTable is 10, and it's the gem's default as well.
+
+To avoid request problems, the maximum number of "chunks" permitted is 5. In other words, if you use the `batch_limit: 10`, you can pass an array having 50 elements.
+
+```ruby
+Tea = Airrecord.table("api_key", "app_key", "Teas", batch_limit: 10)
+
+# An alternative to set batch_limit
+# Tea.batch_limit=(5)
+
+new_teas = [ { "Name" => "Assam Tea", "Type" => "Black" }, 
+             { "Name" => "Red Rooibos", "Type" => "Rooibos" },
+             { "Name" => "Dan Cong", "Type" => "Oolong" },
+             { "Name" => "Earl Grey Tea", "Type" => "Black"}
+]
+
+Tea.batch_create(new_teas)
+```
+
+If you need to manipulate a record before saving it, is recommended to use the `#create` method instead.
+
+**NOTE:** Column names must match the exact column names in Airtable,
+otherwise Airrecord will throw an error that no column matches it, as it happens to the `Table.create` method.
+
+_Earlier versions of airrecord provided methods for snake-cased column names
+and symbols, however this proved error-prone without a proper schema API from
+Airtable which has still not been released._
+
+
 ### Throttling
 
 Airtable's API enforces a 5 requests per second limit per client. In most cases,
