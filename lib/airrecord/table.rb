@@ -77,7 +77,7 @@ module Airrecord
         new(fields).tap { |record| record.save(options) }
       end
 
-      def batch_create(records, options = {})
+      def batch_create(records, options = {}, typecast: false)
         raise TypeError, 'The records must be an Array' unless records.is_a? Array
 
         chunks = records.each_slice(batch_limit).to_a
@@ -93,7 +93,8 @@ module Airrecord
 
           body = {
             records: serialized_chunks,
-            **options
+            **options,
+            typecast: typecast
           }.to_json
 
           response = client.connection.post(path, body, { 'Content-Type' => 'application/json' })
