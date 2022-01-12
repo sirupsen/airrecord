@@ -43,8 +43,8 @@ module Airrecord
     end
 
     def handle_error(status, error)
-      if error.is_a?(Hash)
-        raise Error, "HTTP #{status}: #{error['error']["type"]}: #{error['error']['message']}"
+      if error.is_a?(Hash) && error['error']
+        raise Error, "HTTP #{status}: #{error['error']['type']}: #{error['error']['message']}"
       else
         raise Error, "HTTP #{status}: Communication error: #{error}"
       end
