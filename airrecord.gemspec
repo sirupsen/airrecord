@@ -23,6 +23,7 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "faraday", [">= 0.10", "< 3.0"]
   spec.add_dependency "net-http-persistent"
+  spec.add_dependency "faraday-net_http_persistent"
 
   spec.add_development_dependency "bundler", "~> 2"
   spec.add_development_dependency "byebug"
