@@ -1,3 +1,7 @@
+# 1.0.9
+
+* Faraday 2 compatibility round 2 (#90)
+
 # 1.0.8
 
 * Faraday 2 compatibility (#88)
