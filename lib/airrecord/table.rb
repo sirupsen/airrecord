@@ -3,8 +3,8 @@ require 'rubygems' # For Gem::Version
 module Airrecord
   class Table
     class << self
-      attr_accessor :base_key, :table_name
-      attr_writer :api_key
+      attr_accessor :base_key, :table_name, :batch_limit
+      attr_writer :api_key, :batch_limit
 
       def client
         @@clients ||= {}
@@ -13,6 +13,11 @@ module Airrecord
 
       def api_key
         defined?(@api_key) ? @api_key : Airrecord.api_key
+      end
+
+      def batch_limit
+        fallback = defined?(Airrecord.batch_limit) ? Airrecord.batch_limit : 10
+        defined?(@batch_limit) ? @batch_limit : fallback
       end
 
       def has_many(method_name, options)
@@ -54,6 +59,21 @@ module Airrecord
         or_args = ids.map { |id| "RECORD_ID() = '#{id}'"}.join(',')
         formula = "OR(#{or_args})"
         records(filter: formula).sort_by { |record| or_args.index(record.id) }
+      end
+
+      def destroy_many(ids)
+        raise Error, "Only #{batch_limit} records can be passed at a time" if ids.length > batch_limit
+        return true if ids.empty?
+
+        path = "/v0/#{base_key}/#{client.escape(table_name)}"
+        response = client.connection.delete(path, { 'records' => ids })
+        parsed_response = client.parse(response.body)
+
+        if response.success?
+          true
+        else
+          client.handle_error(response.status, parsed_response)
+        end
       end
 
       def create(fields, options = {})

@@ -11,6 +11,13 @@ class Minitest::Test
     end
   end
 
+  def stub_delete_many_request(ids, table: @table, status: 202, response_body: "")
+    param = ids.map { |id| "records[]=#{id}" }.join('&')
+    @stubs.delete("/v0/#{@table.base_key}/#{@table.table_name}?#{param}") do |env|
+      [status, {}, response_body]
+    end
+  end
+
   def stub_post_request(record, table: @table, status: 200, headers: {}, options: {}, return_body: nil)
     return_body ||= {
       id: SecureRandom.hex(16),

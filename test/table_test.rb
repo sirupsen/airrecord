@@ -319,6 +319,42 @@ class TableTest < Minitest::Test
     assert_equal([], @table.find_many([]))
   end
 
+  def test_destroy_many
+    ids = %w[rec1 rec2 rec3]
+
+    stub_delete_many_request(ids)
+
+    assert @table.destroy_many(ids)
+  end
+
+  def test_destroy_failes_if_exceeds_max_batch_size
+    @table.batch_limit = 2
+    ids = %w[rec1 rec2 rec3]
+
+    stub_delete_many_request(ids)
+
+    assert_raises Airrecord::Error do
+      @table.destroy_many(ids)
+    end
+  end
+
+  def test_destroy_many_handles_error
+    ids = %w[rec1 rec2 rec3]
+
+    stub_delete_many_request(ids, status: 401,
+                                  response_body: { error: { type: 'not found', message: 'not found' } }.to_json)
+
+    assert_raises Airrecord::Error do
+      @table.destroy_many(ids)
+    end
+  end
+
+  def test_destroy_many_makes_no_network_call_when_ids_are_empty
+    stub_request([], status: 500)
+
+    assert(@table.destroy_many([]))
+  end
+
   def test_destroy_new_record_fails
     record = @table.new("Name" => "walrus")
 
