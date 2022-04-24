@@ -1,3 +1,7 @@
+# 1.0.10
+
+* No longer compatible with Faraday < 1
+
 # 1.0.9
 
 * Faraday 2 compatibility round 2 (#90)
