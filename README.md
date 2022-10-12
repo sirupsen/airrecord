@@ -1,5 +1,9 @@
 # Airrecord
 
+## TED Fork of Airrecord
+This is a TED fork of Airrecord to maintain compatbility with Ruby 3 and Faraday v0.10.x.
+It *will not* work with Faraday v2. If you want Faraday v2 you need to go back to the main gem.
+
 Airrecord is an alternative Airtable Ruby libary to
 [`airtable-ruby`](https://github.com/airtable/airtable-ruby). Airrecord attempts
 to enforce a more [database-like API to
