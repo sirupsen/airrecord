@@ -6,12 +6,32 @@ module Airrecord
       attr_accessor :requests
     end
 
-    def initialize(app, requests_per_second: nil, sleeper: nil)
-      super(app)
-      @rps = requests_per_second
-      @sleeper = sleeper || ->(seconds) { sleep(seconds) }
-      @mutex = Mutex.new
-      clear
+    if Gem::Version.new(RUBY_VERSION) >= Gem::Version.new("3.0.0")
+      def initialize(app, kwargs = {})
+        super(app)
+        @rps = kwargs[:requests_per_second]
+        @sleeper = kwargs[:sleeper] || ->(seconds) { sleep(seconds) }
+        @mutex = Mutex.new
+        clear
+      end
+    else
+      def initialize(app, requests_per_second: nil, sleeper: nil)
+        super(app)
+        @rps = requests_per_second
+        @sleeper = sleeper || ->(seconds) { sleep(seconds) }
+        @mutex = Mutex.new
+        clear
+      end
+    end
+
+    def call(env)
+      @mutex.synchronize do
+        wait if too_many_requests_in_last_second?
+        @app.call(env).on_complete do |_response_env|
+          requests << Process.clock_gettime(Process::CLOCK_MONOTONIC)
+          requests.shift if requests.size > @rps
+        end
+      end
     end
 
     def call(env)
