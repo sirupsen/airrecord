@@ -45,7 +45,7 @@ class Minitest::Test
   end
 
   # TODO: Problem, can't stub on params.
-  def stub_request(records, table: @table, status: 200, headers: {}, offset: nil, clear: true)
+  def stub_records_request(records, table: @table, status: 200, headers: {}, offset: nil, clear: true)
     @stubs.instance_variable_set(:@stack, {}) if clear
 
     body = {
@@ -59,7 +59,7 @@ class Minitest::Test
       offset: offset,
     }.to_json
 
-    @stubs.get("/v0/#{table.base_key}/#{table.table_name}") do |env|
+    @stubs.post("/v0/#{table.base_key}/#{table.table_name}/listRecords") do |env|
       [status, headers, body]
     end
   end
@@ -87,7 +87,7 @@ class Minitest::Test
       }
     }.to_json
 
-    @stubs.get("/v0/#{table.base_key}/#{table.table_name}") do |env|
+    @stubs.post("/v0/#{table.base_key}/#{table.table_name}/listRecords") do |env|
       [status, headers, body]
     end
   end

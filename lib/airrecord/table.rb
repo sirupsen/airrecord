@@ -76,8 +76,8 @@ module Airrecord
         options[:maxRecords] = max_records if max_records
         options[:pageSize] = page_size if page_size
 
-        path = "/v0/#{base_key}/#{client.escape(table_name)}"
-        response = client.connection.get(path, options)
+        path = "/v0/#{base_key}/#{client.escape(table_name)}/listRecords"
+        response = client.connection.post(path, options.to_json, { 'Content-Type' => 'application/json' })
         parsed_response = client.parse(response.body)
 
         if response.success?

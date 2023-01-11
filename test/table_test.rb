@@ -25,7 +25,7 @@ class TableTest < Minitest::Test
       builder.adapter :test, @stubs
     }
 
-    stub_request([{"Name" => "omg", "Notes" => "hello world"}, {"Name" => "more", "Notes" => "walrus"}])
+    stub_records_request([{"Name" => "omg", "Notes" => "hello world"}, {"Name" => "more", "Notes" => "walrus"}])
   end
 
   def test_table_overrides_key
@@ -48,14 +48,14 @@ class TableTest < Minitest::Test
   end
 
   def test_filter_records
-    stub_request([{"Name" => "yes"}, {"Name" => "no"}])
+    stub_records_request([{"Name" => "yes"}, {"Name" => "no"}])
 
     records = @table.records(filter: "Name")
     assert_equal "yes", records[0]["Name"]
   end
 
   def test_sort_records
-    stub_request([{"Name" => "a"}, {"Name" => "b"}])
+    stub_records_request([{"Name" => "a"}, {"Name" => "b"}])
 
     records = @table.records(sort: { "Name" => 'asc' })
     assert_equal "a", records[0]["Name"]
@@ -63,7 +63,7 @@ class TableTest < Minitest::Test
   end
 
   def test_view_records
-    stub_request([{"Name" => "a"}, {"Name" => "a"}])
+    stub_records_request([{"Name" => "a"}, {"Name" => "a"}])
 
     records = @table.records(view: 'A')
     assert_equal "a", records[0]["Name"]
@@ -71,18 +71,18 @@ class TableTest < Minitest::Test
   end
 
   def test_follow_pagination_by_default
-    stub_request([{"Name" => "1"}, {"Name" => "2"}], offset: 'dasfuhiu')
-    stub_request([{"Name" => "3"}, {"Name" => "4"}], offset: 'odjafio', clear: false)
-    stub_request([{"Name" => "5"}, {"Name" => "6"}], clear: false)
+    stub_records_request([{"Name" => "1"}, {"Name" => "2"}], offset: 'dasfuhiu')
+    stub_records_request([{"Name" => "3"}, {"Name" => "4"}], offset: 'odjafio', clear: false)
+    stub_records_request([{"Name" => "5"}, {"Name" => "6"}], clear: false)
 
     records = @table.records
     assert_equal 6, records.size
   end
 
   def test_dont_follow_pagination_if_disabled
-    stub_request([{"Name" => "1"}, {"Name" => "2"}], offset: 'dasfuhiu')
-    stub_request([{"Name" => "3"}, {"Name" => "4"}], offset: 'odjafio', clear: false)
-    stub_request([{"Name" => "5"}, {"Name" => "6"}], clear: false)
+    stub_records_request([{"Name" => "1"}, {"Name" => "2"}], offset: 'dasfuhiu')
+    stub_records_request([{"Name" => "3"}, {"Name" => "4"}], offset: 'odjafio', clear: false)
+    stub_records_request([{"Name" => "5"}, {"Name" => "6"}], clear: false)
 
     records = @table.records(paginate: false)
     assert_equal 2, records.size
@@ -314,7 +314,7 @@ class TableTest < Minitest::Test
   end
 
   def test_find_many_makes_no_network_call_when_ids_are_empty
-    stub_request([], status: 500)
+    stub_records_request([], status: 500)
 
     assert_equal([], @table.find_many([]))
   end
@@ -353,7 +353,7 @@ class TableTest < Minitest::Test
   end
 
   def test_dates_are_not_type_casted
-    stub_request([{"Name" => "omg", "Created" => Time.now.to_s}])
+    stub_records_request([{"Name" => "omg", "Created" => Time.now.to_s}])
 
     record = first_record
     assert_instance_of String, record["Created"]

@@ -41,7 +41,7 @@ class AssociationsTest < MiniTest::Test
       { "id" => "rec2", "Name" => "Good brew" },
       { "id" => "rec1", "Name" => "Decent brew" }
     ]
-    stub_request(brews, table: Brew)
+    stub_records_request(brews, table: Brew)
 
     assert_equal 2, tea.brews.size
     assert_kind_of Airrecord::Table, tea.brews.first
@@ -50,7 +50,7 @@ class AssociationsTest < MiniTest::Test
 
   def test_has_many_handles_empty_associations
     tea = Tea.new("Name" => "Gunpowder")
-    stub_request([{ "id" => "brew1", "Name" => "unrelated"  }], table: Brew)
+    stub_records_request([{ "id" => "brew1", "Name" => "unrelated"  }], table: Brew)
     assert_equal 0, tea.brews.size
   end
 
@@ -82,7 +82,7 @@ class AssociationsTest < MiniTest::Test
 
     tea.create
 
-    stub_request([{ id: "rec2" }, { id: "rec1" }], table: Brew)
+    stub_records_request([{ id: "rec2" }, { id: "rec1" }], table: Brew)
     assert_equal 2, tea.brews.count
   end
 
@@ -110,7 +110,7 @@ class AssociationsTest < MiniTest::Test
     tea.brews = brews
 
     brew_fields = brews.map { |brew| brew.fields.merge("id" => brew.id) }
-    stub_request(brew_fields, table: Brew)
+    stub_records_request(brew_fields, table: Brew)
 
     assert_equal 2, tea.brews.size
     assert_kind_of Airrecord::Table, tea.brews.first

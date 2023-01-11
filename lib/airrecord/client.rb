@@ -1,5 +1,3 @@
-require 'uri'
-require_relative 'query_string'
 require_relative 'faraday_rate_limiter'
 
 module Airrecord
@@ -21,9 +19,7 @@ module Airrecord
         headers: {
           "Authorization" => "Bearer #{api_key}",
           "User-Agent"    => "Airrecord/#{Airrecord::VERSION}",
-          "X-API-VERSION" => "0.1.0",
         },
-        request: { params_encoder: Airrecord::QueryString }
       ) do |conn|
         if Airrecord.throttle?
           conn.request :airrecord_rate_limiter, requests_per_second: AIRTABLE_RPS_LIMIT
@@ -33,7 +29,7 @@ module Airrecord
     end
 
     def escape(*args)
-      QueryString.escape(*args)
+      CGI.escape(*args)
     end
 
     def parse(body)
