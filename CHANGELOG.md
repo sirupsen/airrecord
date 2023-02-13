@@ -1,3 +1,7 @@
+# 1.0.11
+
+* Switch back to default Faraday encoder and change list-records call to POST
+
 # 1.0.10
 
 * No longer compatible with Faraday < 1
