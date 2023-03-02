@@ -1,4 +1,5 @@
 require_relative 'faraday_rate_limiter'
+require 'erb'
 
 module Airrecord
   class Client
@@ -28,8 +29,8 @@ module Airrecord
       end
     end
 
-    def escape(*args)
-      CGI.escape(*args)
+    def escape(*args) 
+      ERB::Util.url_encode(*args)
     end
 
     def parse(body)
