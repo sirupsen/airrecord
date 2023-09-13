@@ -262,8 +262,9 @@ Airtable which has still not been released._
 
 ### Updating
 
-Updating a record is done by changing the attributes and persistent to
-Airtable with `#save`.
+Updating can be done in two ways:
+
+1. With a record instance, change the attributes and persist to Airtable with `#save`
 
 ```ruby
 tea = Tea.find("someid")
@@ -271,6 +272,12 @@ tea["Name"] = "Feng Gang Organic"
 tea["Village"] = "Feng Gang"
 
 tea.save # persist to Airtable
+```
+
+2. With the `Table.update` class method (to save an API find call)
+
+```ruby
+Tea.update("someid", { "Name" => "Feng Gang Organic", "Village" => "Feng Gang" })
 ```
 
 _Airtable's API doesn't allow you to change attachment's filename. As a workaround you can delete the original attachment and [upload a new one](https://github.com/sirupsen/airrecord#file-uploads) with the original URL and a new filename._
