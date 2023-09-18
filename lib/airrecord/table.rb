@@ -56,6 +56,23 @@ module Airrecord
         records(filter: formula).sort_by { |record| or_args.index(record.id) }
       end
 
+      def update(id, update_hash = {}, options = {})
+        # To avoid trying to update computed fields we *always* use PATCH
+        body = {
+          fields: update_hash,
+          **options
+        }.to_json
+
+        response = client.connection.patch("/v0/#{base_key}/#{client.escape(table_name)}/#{id}", body, { 'Content-Type' => 'application/json' })
+        parsed_response = client.parse(response.body)
+
+        if response.success?
+          parsed_response["fields"]
+        else
+          client.handle_error(response.status, parsed_response)
+        end
+      end
+
       def create(fields, options = {})
         new(fields).tap { |record| record.save(options) }
       end
@@ -166,22 +183,11 @@ module Airrecord
       return create(options) if new_record?
       return true if @updated_keys.empty?
 
-      # To avoid trying to update computed fields we *always* use PATCH
-      body = {
-        fields: Hash[@updated_keys.map { |key|
-          [key, fields[key]]
-        }],
-        **options
-      }.to_json
+      update_hash = Hash[@updated_keys.map { |key|
+        [key, fields[key]]
+      }]
 
-      response = client.connection.patch("/v0/#{self.class.base_key}/#{client.escape(self.class.table_name)}/#{self.id}", body, { 'Content-Type' => 'application/json' })
-      parsed_response = client.parse(response.body)
-
-      if response.success?
-        self.fields = parsed_response["fields"]
-      else
-        client.handle_error(response.status, parsed_response)
-      end
+      self.fields = self.class.update(self.id, update_hash, options)
     end
 
     def destroy
