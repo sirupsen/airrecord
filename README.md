@@ -124,7 +124,7 @@ Airrecord.api_key = "your api key" # see authentication section
 
 class Tea < Airrecord::Table
   self.base_key = "app1"
-  self.table_name = "Teas"
+  self.table_name = "Teas" # or the tblX id
 
   def location
     [self["Village"], self["Country"], self["Region"]].compact.join(", ")
