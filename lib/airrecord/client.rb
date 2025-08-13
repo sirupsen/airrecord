@@ -14,9 +14,17 @@ module Airrecord
       @api_key = api_key
     end
 
+    def self.api_uri=(uri)
+      @api_uri = URI.parse(uri)
+    end
+
+    def self.api_uri
+      @api_uri || URI.parse("https://api.airtable.com")
+    end
+
     def connection
       @connection ||= Faraday.new(
-        url: "https://api.airtable.com",
+        url: self.class.api_uri,
         headers: {
           "Authorization" => "Bearer #{api_key}",
           "User-Agent"    => "Airrecord/#{Airrecord::VERSION}",
@@ -29,7 +37,7 @@ module Airrecord
       end
     end
 
-    def escape(*args) 
+    def escape(*args)
       ERB::Util.url_encode(*args)
     end
 
