@@ -48,6 +48,10 @@ module Airrecord
         end
       end
 
+      def find_or_create(id, fields, options = {})
+        find(id) || create(fields, options)
+      end
+
       def find_many(ids)
         return [] if ids.empty?
 
@@ -73,8 +77,76 @@ module Airrecord
         end
       end
 
+      # @params {Array[Hash]} update_records
+      # @params {Hash}        options
+      # @return {boolean}     updated records
+      # 
+      # update_records example: [{ fields: { TEST: 'Some Value'}, id: <record_id> }, ...]
+      def bulk_update(update_records = [], options = {})
+        raise "Allowed only 10 records in the bulk." if update_records.size > 10
+
+        body = { records: update_records, **options }.to_json
+
+        response = client.connection.patch("/v0/#{base_key}/#{client.escape(table_name)}", body,
+                                          { 'Content-Type' => 'application/json' })
+
+        parsed_response = parse(response.body)
+
+        if response.success?
+          parsed_response['records'].map do |record|
+            new(record['fields'], id: record['id'], created_at: record['createdTime'])
+          end
+        else
+          client.handle_error(response.status, parsed_response)
+        end
+      end
+
       def create(fields, options = {})
         new(fields).tap { |record| record.save(options) }
+      end
+
+      # @params {Array[Hash]} create_records
+      # @params {Hash}        options
+      # @return {boolean}     updated records
+      # 
+      # create_records example: [{ fields: { TEST: 'Some Value'}}, ...]
+      def bulk_create(create_records = [], options = {})
+      raise "Allowed only 10 records in the bulk." if create_records.size > 10
+
+        body = { records: create_records, **options }.to_json
+
+        response = client.connection.post("/v0/#{base_key}/#{client.escape(table_name)}", body,
+                                          { 'Content-Type' => 'application/json' })
+
+        parsed_response = parse(response.body)
+
+        if response.success?
+          parsed_response['records'].map do |record|
+            new(record['fields'], id: record['id'], created_at: record['createdTime'])
+          end
+        else
+          client.handle_error(response.status, parsed_response)
+        end
+      end
+
+      # @params { Array[Record_ID] }                                   ids
+      # @params { Hash }                                               options
+      # @return { Array[{'deleted':boolean, 'id':string}] | boolean }  success statatus
+      def bulk_delete(ids)
+        raise "Allowed only 10 records in the bulk." if ids.size > 10
+
+        query = ids.map { |id| "#{CGI.escape('records[]')}=#{id}" }.join('&')
+
+        response = client.connection.delete("/v0/#{base_key}/#{client.escape(table_name)}?#{query}",
+                                            { 'Content-Type' => 'application/json' })
+
+        parsed_response = parse(response.body)
+
+        if response.success?
+          parsed_response['records']
+        else
+          client.handle_error(response.status, parsed_response)
+        end
       end
 
       def records(filter: nil, sort: nil, view: nil, offset: nil, paginate: true, fields: nil, max_records: nil, page_size: nil)
@@ -122,6 +194,10 @@ module Airrecord
         end
       end
       alias all records
+
+      def count
+        records(fields: []).count
+      end
     end
 
     attr_reader :fields, :id, :created_at, :updated_keys
