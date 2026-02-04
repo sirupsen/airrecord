@@ -8,7 +8,7 @@ require "airrecord/table"
 
 module Airrecord
   extend self
-  attr_accessor :api_key, :throttle
+  attr_accessor :api_key, :api_uri, :throttle
 
   Error = Class.new(StandardError)
 
