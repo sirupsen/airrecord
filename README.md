@@ -210,6 +210,28 @@ Tea.all(paginate: false)
 Tea.all(sort: { "Created At" => "desc" }, paginate: false)
 ```
 
+To iterate a large table without loading every page into memory at once, use
+`#find_each`. It yields one record at a time and fetches the next page as needed:
+
+```ruby
+Tea.find_each(filter: '{Country} = "China"') do |tea|
+  puts tea["Name"]
+end
+
+# Without a block, returns an Enumerator
+Tea.find_each.map { |tea| tea["Name"] }
+```
+
+For manual pagination, `#records_page` returns one page plus the next offset
+(or `nil` when there are no more pages):
+
+```ruby
+begin
+  page, offset = Tea.records_page(sort: { "Name" => "asc" }, offset: offset)
+  page.each { |tea| puts tea["Name"] }
+end while offset
+```
+
 When you know the IDs of the records you want, and you want them in an ad-hoc
 order, use `#find_many` instead of `#all`:
 

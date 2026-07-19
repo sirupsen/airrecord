@@ -88,6 +88,73 @@ class TableTest < Minitest::Test
     assert_equal 2, records.size
   end
 
+  def test_records_page_returns_records_and_offset
+    stub_records_request([{"Name" => "1"}, {"Name" => "2"}], offset: 'dasfuhiu')
+
+    records, offset = @table.records_page
+
+    assert_equal 2, records.size
+    assert_equal "dasfuhiu", offset
+  end
+
+  def test_records_page_returns_nil_offset_when_no_more_pages
+    stub_records_request([{"Name" => "1"}, {"Name" => "2"}])
+
+    records, offset = @table.records_page
+
+    assert_equal 2, records.size
+    assert_nil offset
+  end
+
+  def test_records_page_can_resume_from_offset
+    response_body = {
+      records: [
+        { id: "rec3", fields: { "Name" => "3" }, createdTime: Time.now },
+        { id: "rec4", fields: { "Name" => "4" }, createdTime: Time.now },
+      ],
+      offset: "odjafio",
+    }.to_json
+
+    request_offset = nil
+    @stubs.instance_variable_set(:@stack, {})
+    @stubs.post("/v0/#{@table.base_key}/#{@table.table_name}/listRecords") do |env|
+      request_offset = JSON.parse(env.body)["offset"]
+      [200, {}, response_body]
+    end
+
+    records, offset = @table.records_page(offset: "dasfuhiu")
+
+    assert_equal "dasfuhiu", request_offset
+    assert_equal %w[3 4], records.map { |record| record["Name"] }
+    assert_equal "odjafio", offset
+  end
+
+  def test_find_each_yields_all_records_across_pages
+    stub_records_request([{"Name" => "1"}, {"Name" => "2"}], offset: 'dasfuhiu')
+    stub_records_request([{"Name" => "3"}, {"Name" => "4"}], offset: 'odjafio', clear: false)
+    stub_records_request([{"Name" => "5"}, {"Name" => "6"}], clear: false)
+
+    names = []
+    @table.find_each { |record| names << record["Name"] }
+
+    assert_equal %w[1 2 3 4 5 6], names
+  end
+
+  def test_find_each_returns_enumerator_without_block
+    stub_records_request([{"Name" => "1"}, {"Name" => "2"}], offset: 'dasfuhiu')
+    stub_records_request([{"Name" => "3"}, {"Name" => "4"}], clear: false)
+
+    enum = @table.find_each
+
+    assert_instance_of Enumerator, enum
+    assert_equal %w[1 2 3 4], enum.map { |record| record["Name"] }
+  end
+
+  def test_find_each_rejects_pagination_options
+    assert_raises(ArgumentError) { @table.find_each(offset: true) }
+    assert_raises(ArgumentError) { @table.find_each(paginate: true) }
+  end
+
   def test_index_by_normalized_name
     assert_equal "omg", first_record["Name"]
   end
