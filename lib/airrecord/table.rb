@@ -38,6 +38,8 @@ module Airrecord
       alias has_one belongs_to
 
       def find(id)
+        raise ArgumentError, "nil ID" if id.nil?
+
         response = client.connection.get("/v0/#{base_key}/#{client.escape(table_name)}/#{id}")
         parsed_response = client.parse(response.body)
 

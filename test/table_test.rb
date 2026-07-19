@@ -308,6 +308,13 @@ class TableTest < Minitest::Test
     end
   end
 
+  def test_find_raises_argument_error_for_nil_id
+    error = assert_raises ArgumentError do
+      @table.find(nil)
+    end
+    assert_equal "nil ID", error.message
+  end
+
   def test_find_many
     ids = %w[rec1 rec2 rec3]
     assert_instance_of Array, @table.find_many(ids)
