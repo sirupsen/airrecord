@@ -77,7 +77,7 @@ module Airrecord
         new(fields).tap { |record| record.save(options) }
       end
 
-      def records(filter: nil, sort: nil, view: nil, offset: nil, paginate: true, fields: nil, max_records: nil, page_size: nil)
+      def records_page(filter: nil, sort: nil, view: nil, offset: nil, fields: nil, max_records: nil, page_size: nil)
         options = {}
         options[:filterByFormula] = filter if filter
 
@@ -98,30 +98,46 @@ module Airrecord
         parsed_response = client.parse(response.body)
 
         if response.success?
-          records = parsed_response["records"]
-          records = records.map { |record|
+          records = parsed_response["records"].map { |record|
             self.new(record["fields"], id: record["id"], created_at: record["createdTime"])
           }
-
-          if paginate && parsed_response["offset"]
-            records.concat(records(
-              filter: filter,
-              sort: sort,
-              view: view,
-              paginate: paginate,
-              fields: fields,
-              offset: parsed_response["offset"],
-              max_records: max_records,
-              page_size: page_size,
-            ))
-          end
-
-          records
+          [records, parsed_response["offset"]]
         else
           client.handle_error(response.status, parsed_response)
         end
       end
+
+      def records(paginate: true, **options)
+        records, next_offset = records_page(**options)
+
+        if paginate && next_offset
+          records.concat(records(**options, offset: next_offset, paginate: paginate))
+        end
+
+        records
+      end
       alias all records
+
+      def find_each(filter: nil, sort: nil, view: nil, fields: nil, max_records: nil, page_size: nil, &block)
+        options = {
+          filter: filter,
+          sort: sort,
+          view: view,
+          fields: fields,
+          max_records: max_records,
+          page_size: page_size,
+        }
+
+        return enum_for(:find_each, **options) unless block_given?
+
+        loop do
+          page, offset = records_page(**options, offset: offset)
+
+          page.each(&block)
+
+          break unless offset
+        end
+      end
     end
 
     attr_reader :fields, :id, :created_at, :updated_keys

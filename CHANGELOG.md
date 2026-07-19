@@ -1,3 +1,8 @@
+# 1.0.13
+
+* Add `Table.find_each` to iterate records page-by-page without loading the full table into memory
+* Add `Table.records_page` to fetch a single page and return `[records, next_offset]` for manual pagination
+
 # 1.0.11
 
 * Switch back to default Faraday encoder and change list-records call to POST
